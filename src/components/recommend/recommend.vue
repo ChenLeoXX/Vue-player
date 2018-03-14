@@ -1,6 +1,7 @@
 <template>
     <div class="recommend" ref="recommend">
-      <div class="recommend-content">
+          <scroll ref="scroll" class="recommend-content" :data="disclist">
+          <div>
         <!-- 这里的v-if为了等数据到来后才去渲染slider组件 ,否则会直接渲染slider,这时候数据可能还没到来,不能正确渲染-->
         <div v-if="recommends.length" class="slider-wrapper" ref="sliderWrapper">
           <slider>
@@ -16,7 +17,7 @@
           <ul>
             <li v-for="(item,index) in disclist" :key="index" class="item">
               <div class="icon">
-                <img width="60" height="60" :src="item.imgurl" alt="">
+                <img width="60" height="60" v-lazy="item.imgurl" alt="" @load="loadImg">
               </div>
               <div class="text">
                 <h2 class="name" v-html="item.creator.name"></h2>
@@ -25,7 +26,12 @@
             </li>
           </ul>
         </div>
-      </div>
+        </div>
+        <div class="loadding-ct" v-show="!disclist.length">
+          <loadding></loadding>
+        </div>
+        </scroll>
+      <router-view></router-view>
     </div>
 </template>
 <script>
@@ -33,10 +39,14 @@ import {getRecommend} from 'api/recommend'
 import {getDiscList} from 'api/recommend'
 import {ERR_OK} from 'api/config'
 import Slider from 'base/slider/slider'
+import Scroll from 'base/scroll/scroll'
+import Loadding from 'base/loadding/loadding'
 export default {
   name:"recommend",
   components:{
-    Slider
+    Slider,
+    Scroll,
+    Loadding
   },
   data(){
     return{
@@ -46,8 +56,7 @@ export default {
   },
   created(){
     this._getRecommend() //异步获取真实数据
-    this._getRecommendDiscList()
-
+      this._getRecommendDiscList()
   },
   methods:{
     _getRecommend(){
@@ -64,6 +73,17 @@ export default {
           this.disclist = res.data.list
         }
       })
+    },
+    loadImg(){
+      //因为热门歌单组件获取数据是异步获取,当数据还未到来的时候出发BScroll的
+      // 重新计算子元素高度方法,可能会造成计算错误,没有把轮播组件高度算进去
+      // 所以使用图片加载事件,当图片被加载完毕后撑起了轮播容器高度,那么再去计算就不会发生无法滚动到底部的BUG
+      // 如果单单去监听一个 data的change事件,因为网络的原因,渲染顺序不一定会按顺序,所以这样是最保险的做法.
+      if(!this.isLoaded){//节流,避免每一次加载图片就触发一次refresh 造成 浪费
+        this.$refs.scroll.refresh(
+          this.isLoaded =true
+        )
+      }
     }
   }
 }
@@ -111,7 +131,7 @@ export default {
               color: $color-text
             .desc
               color: $color-text-d
-      .loading-container
+      .loadding-ct
         position: absolute
         width: 100%
         top: 50%
