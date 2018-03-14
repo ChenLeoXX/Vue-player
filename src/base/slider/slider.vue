@@ -44,10 +44,42 @@ export default {
             this._play()//自动轮播
         }        
         },20) //设置20毫秒延时.
-        
+        window.addEventListener('resize',()=>{//监听窗口的 变化,来重新计算轮播容器宽度
+        if (!this.slider || !this.slider.enabled) {//如果轮播还未初始化,或者无法使用return掉
+          return
+        }
+        clearTimeout(this.resizeTimer)
+        this.resizeTimer = setTimeout(() => {
+          if (this.slider.isInTransition) {
+            this._onScrollEnd()
+          } else {
+            if (this.autoPlay) {
+              this._play()
+            }
+          }
+          this._refresh()//重新计算轮播容器宽度
+        }, 60)
+        })
     },
+    activated() {//生命周期钩子
+      this.slider.enable()
+      let pageIndex = this.slider.getCurrentPage().pageX
+      this.slider.goToPage(pageIndex, 0, 0)
+      this.currentPageIndex = pageIndex
+      if (this.autoPlay) {
+        this._play()
+      }
+    },
+    deactivated() {//生命周期钩子
+      this.slider.disable()
+      clearTimeout(this.timer)
+    },
+    beforeDestroy() {//生命周期钩子
+      this.slider.disable()
+      clearTimeout(this.timer)
+    },    
   methods:{
-      _setSliderWidth(){
+      _setSliderWidth(isResize){ //传递一个isResize 确保每一次resize不会再触发2 * width的计算,但在第一次时会计算
           this.children = this.$refs.sliderGroup.children
           let width=0  //全部宽度
           let sliderWidth = this.$refs.slider.clientWidth //轮播容器宽度
@@ -57,7 +89,7 @@ export default {
               child.style.width = sliderWidth +'px'
               width += sliderWidth
           }
-          if(this.loop){//如果是无限轮播那么首尾应增加两个子元素的长度
+          if(this.loop && !isResize){//如果是无限轮播那么首尾应增加两个子元素的长度
               width += sliderWidth *2
           }
           this.$refs.sliderGroup.style.width = width +'px'
@@ -79,23 +111,34 @@ export default {
             this._play()
           }
         })        
-
+          this.slider.on('beforeScrollStart', () => {
+          if (this.autoPlay) {
+            clearTimeout(this.timer)
+          }
+        })        
       },
       _play(){
         clearTimeout(this.timer)
         this.timer = setTimeout(() => {
-          this.slider.next()
+          this.slider.next()//自动触发scrollEnd 事件
         }, this.interval)          
       },
       _initDots(){
           this.dots = new Array(this.children.length)
       },
+      
       _onScrollEnd(){
         let pageInx = this.slider.getCurrentPage().pageX
         this.currentPageIndex = pageInx
         if (this.autoPlay) {
           this._play()
         }                  
+      },      
+        _refresh() {//重新计算轮播宽度
+        if (this.slider) {
+          this._setSliderWidth(true)
+          this.slider.refresh()
+        }
       }
   }
 }

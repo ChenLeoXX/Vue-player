@@ -6,7 +6,7 @@
           <slider>
             <div v-for="(item,index) in recommends" :key="index">
               <a :href="item.linkUrl">
-                <img class="needsclick"  :src="item.picUrl">
+                <img :src="item.picUrl">
               </a>
             </div>
           </slider>
@@ -14,6 +14,15 @@
         <div class="recommend-list">
           <h1 class="list-title">热门歌单</h1>
           <ul>
+            <li v-for="(item,index) in disclist" :key="index" class="item">
+              <div class="icon">
+                <img width="60" height="60" :src="item.imgurl" alt="">
+              </div>
+              <div class="text">
+                <h2 class="name" v-html="item.creator.name"></h2>
+                <p class="desc" v-html="item.dissname"></p>
+              </div>
+            </li>
           </ul>
         </div>
       </div>
@@ -21,6 +30,7 @@
 </template>
 <script>
 import {getRecommend} from 'api/recommend'
+import {getDiscList} from 'api/recommend'
 import {ERR_OK} from 'api/config'
 import Slider from 'base/slider/slider'
 export default {
@@ -30,17 +40,28 @@ export default {
   },
   data(){
     return{
-      recommends:[]
+      recommends:[],
+      disclist:[]
     }
   },
   created(){
     this._getRecommend() //异步获取真实数据
+    this._getRecommendDiscList()
+
   },
   methods:{
     _getRecommend(){
       getRecommend().then((res)=>{
         if(res.code === ERR_OK){
           this.recommends = res.data.slider
+        }
+      })
+    },
+    _getRecommendDiscList(){
+      getDiscList().then((res)=>{
+        if(res.code === ERR_OK){
+          console.log(res.data.list)
+          this.disclist = res.data.list
         }
       })
     }
