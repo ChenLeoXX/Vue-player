@@ -4,9 +4,9 @@
       <slot>
       </slot>
     </div>
-    <!-- <div class="dots">
+    <div class="dots">
       <span class="dot" :class="{active: currentPageIndex === index }" v-for="(item, index) in dots" :key="index"></span>
-    </div> -->
+    </div>
   </div>
 </template>
 <script>
@@ -14,6 +14,12 @@ import BScroll from 'better-scroll'
 import {addClass} from 'common/js/dom'
 export default {
   name:"slider",
+  data(){
+      return{
+          dots:[],
+          currentPageIndex: 0
+      }
+  },
   props:{
         loop:{
             type:Boolean,
@@ -25,14 +31,20 @@ export default {
         },
         interval:{
             type:Number,
-            default:4000,
+            default:3000,
         }        
     },
     mounted(){
-        setTimeout(()=>{
+        setTimeout(()=>{//setTimout在这里为了和浏览器刷新率差不多,在mounted周期里确保能取到元素
             this._setSliderWidth()
-            this._initSlider()
-        },20)
+            this._initDots() //初始化轮播下标,再初始化轮之前,为了确保轮播下的子元素长度还是5
+            this._initSlider()//初始化轮播,无限轮播会改动子元素长度
+
+            if (this.autoPlay) {
+            this._play()//自动轮播
+        }        
+        },20) //设置20毫秒延时.
+        
     },
   methods:{
       _setSliderWidth(){
@@ -45,7 +57,7 @@ export default {
               child.style.width = sliderWidth +'px'
               width += sliderWidth
           }
-          if(this.loop){
+          if(this.loop){//如果是无限轮播那么首尾应增加两个子元素的长度
               width += sliderWidth *2
           }
           this.$refs.sliderGroup.style.width = width +'px'
@@ -61,13 +73,35 @@ export default {
             speed: 400
           }
           })
+          this.slider.on('scrollEnd',this._onScrollEnd) //beter-scroll初始化的轮播带有一个scrollEnd事件监听器       
+          this.slider.on('touchend', () => {
+          if (this.autoPlay) {
+            this._play()
+          }
+        })        
+
+      },
+      _play(){
+        clearTimeout(this.timer)
+        this.timer = setTimeout(() => {
+          this.slider.next()
+        }, this.interval)          
+      },
+      _initDots(){
+          this.dots = new Array(this.children.length)
+      },
+      _onScrollEnd(){
+        let pageInx = this.slider.getCurrentPage().pageX
+        this.currentPageIndex = pageInx
+        if (this.autoPlay) {
+          this._play()
+        }                  
       }
   }
 }
 </script>
 <style lang="stylus" scoped>
   @import "~common/stylus/variable"
-
   .slider
     min-height: 1px
     .slider-group

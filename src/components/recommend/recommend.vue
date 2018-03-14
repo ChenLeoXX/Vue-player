@@ -1,6 +1,7 @@
 <template>
     <div class="recommend" ref="recommend">
       <div class="recommend-content">
+        <!-- 这里的v-if为了等数据到来后才去渲染slider组件 ,否则会直接渲染slider,这时候数据可能还没到来,不能正确渲染-->
         <div v-if="recommends.length" class="slider-wrapper" ref="sliderWrapper">
           <slider>
             <div v-for="(item,index) in recommends" :key="index">
@@ -33,7 +34,7 @@ export default {
     }
   },
   created(){
-    this._getRecommend()
+    this._getRecommend() //异步获取真实数据
   },
   methods:{
     _getRecommend(){
