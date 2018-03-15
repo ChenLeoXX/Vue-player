@@ -9,11 +9,13 @@ Vue.config.productionTip = false
 fastclick.attach(document.body)
 /* eslint-disable no-new */
 import 'common/stylus/index.styl'
+import store from './store'
 Vue.use(VueLazyload,{
   loading: require('common/image/default.png')
 })
 new Vue({
   el: '#app',
   router,
+  store,
   render: h => h(App)
 })
