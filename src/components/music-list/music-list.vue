@@ -1,17 +1,44 @@
 <template>
   <div class="music-list">
-      <div class="back">
+      <div class="back" @click='back'>
           <i class="icon-back"></i>
       </div>
       <h1 class="title" v-html="title"></h1>
-      <div class="bg-image" :style="bgStyle">
-          <div class="filter"></div>
+      <div class="bg-image" :style="bgStyle" ref="bgImage">
+          <div class="play-wrapper">
+              <div class="play" ref='playBtn'>
+                  <i class="icon-play" v-show="songs.length>0"></i>
+                  <span class="text">随机播放全部</span>
+              </div>
+          </div>
+          <div class="filter" ref='filter'></div>
       </div>
+      <div class="bg-layer" ref="layer"></div>
+      <!-- 监听scroll事件给bg-layer赋值,让它在Y方向偏移处于list上方的位置形成向上滑动的效果 -->
+      <scroll @scroll="scroll" ref="lsit" :listen-scorll="listenScroll" :probe-type="probeType" :data="songs"> 
+          <div class="song-list-wrapper">
+          <song-list :songs="songs"></song-list>
+          </div>
+          <div class="loadding-container" v-show="!songs.length"></div>
+      </scroll>
   </div>
 </template>
 <script>
+import Scroll from 'base/scroll/scroll'
+import SongList from 'base/songlist/songlist'
+import Loadding from 'base/loadding/loadding'
+import {prefix} from 'common/js/dom'
+const transform = prefix('transform')
+const backdrop = prefix('backdrop-filter')
+const RESERVED_HEIGHT = 40//保留高度
+
 export default {
   name:"music-list",
+  components:{
+      Scroll,
+      SongList,
+      Loadding
+  },
   props:{
       title:{
           type:String,
@@ -30,8 +57,58 @@ export default {
       bgStyle(){
           return `background-image:url(${this.bgImage})`          
       }
+  },
+  mounted(){//refs.list 是一个组件所以要丶el获取元素.
+      this.imageHeight =  this.$refs.bgImage.clientHeight //记录图片高
+      this.minTranslateY =   -this.imageHeight + RESERVED_HEIGHT 
+      //Y正方向上最小的偏移值
+      this.$refs.list.el.style.top = this.imageHeight + 'px'
+      //让滚动组件距离和图片错开
+  },
+  created(){
+      this.probeType = 3 //better-scroll 属性
+      this.listenScroll = true
+  },
+  methods:{
+      scroll(pos){//监听了scroll的值
+        this.scrollY = pos.y
+      },
+      back(){//路由回退
+          this.$route.back()
+      }
+  },
+  watch:{
+      scrollY(newVal){ //watch实时监听scrollY方向的新值
+          let zIndex = 0
+          let scale = 0
+          let blur = 0
+          this.translateY = Math.max(this.minTranslateY,newVal)
+          this.$refs.layer.style['transform'] = `translate3d(0,${this.translateY}px,0)`
+          const percent = Math.abs(newVal / this.imageHeight) 
+          //因为下拉时newVal 增加.要形成无缝放大的效果需要除以图片高度,算出比例
+          if(newVal >0){
+              scale = 1+percent
+              zIndex = 10
+          }else{
+             blur = Math.min(20 * percent*20)
+          }
+          if (newVal < this.minTransalteY) {
+        //如果Scroll元素 Y正方向的偏移量 达到图片位置,(越向上越小)
+          zIndex = 10
+          this.$refs.bgImage.style.paddingTop = 0
+          this.$refs.bgImage.style.height = `${RESERVED_HEIGHT}px`
+          this.$refs.playBtn.style.display = 'none'
+        } else {
+          this.$refs.bgImage.style.paddingTop = '70%'
+          this.$refs.bgImage.style.height = 0
+          this.$refs.playBtn.style.display = ''
+        }
+        this.$refs.bgImage.style[transform] = `scale(${scale})`
+        this.$refs.bgImage.style.zIndex = zIndex
+        this.$refs.filter.style[backdrop]= `blur(${blur}px)`
+      }
+      }
   }
-}
 </script>
 <style lang="stylus" scoped>
   @import "~common/stylus/variable"
