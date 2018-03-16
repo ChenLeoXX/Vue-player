@@ -15,11 +15,12 @@
       </div>
       <div class="bg-layer" ref="layer"></div>
       <!-- 监听scroll事件给bg-layer赋值,让它在Y方向偏移处于list上方的位置形成向上滑动的效果 -->
-      <scroll @scroll="scroll" ref="list" :listen-scorll="listenScroll" :probe-type="probeType" :data="songs"> 
+      <scroll :data="songs" class="list" @scroll="scroll" 
+      ref="list" :listenScorll="listenScroll" :probe-type="probeType"> 
           <div class="song-list-wrapper">
           <song-list :songs="songs" @select="selectItem"></song-list>
           </div>
-          <div class="loadding-ct" v-show="!songs.length">
+          <div class="loading-container" v-show="!songs.length">
               <loadding></loadding>
           </div>
       </scroll>
@@ -31,10 +32,10 @@ import SongList from 'base/songlist/songlist'
 import Loadding from 'base/loadding/loadding'
 import {prefix} from 'common/js/dom'
 import {mapActions} from 'vuex'
+
 const transform = prefix('transform')
 const backdrop = prefix('backdrop-filter')
 const RESERVED_HEIGHT = 40//保留高度
-
 export default {
   name:"music-list",
   components:{
@@ -56,6 +57,11 @@ export default {
           default:''
       }
   },
+  data() {
+      return {
+        scrollY: 0
+      }
+  },
   computed:{
       bgStyle(){
           return `background-image:url(${this.bgImage})`          
@@ -63,7 +69,8 @@ export default {
   },
   mounted(){//refs.list 是一个组件所以要丶el获取元素.
       this.imageHeight =  this.$refs.bgImage.clientHeight //记录图片高
-      this.minTranslateY =   -this.imageHeight + RESERVED_HEIGHT 
+      this.miniTranslateY =   -this.imageHeight + RESERVED_HEIGHT 
+      console.log(this.miniTranslateY)
       //Y正方向上最小的偏移值
       this.$refs.list.$el.style.top = this.imageHeight + 'px'
       //让滚动组件距离和图片错开
@@ -80,6 +87,7 @@ export default {
           this.$router.back()
       },
       selectItem(song,index){
+          console.log(index)
           this.selectPlay({
               list:this.songs,
               index:index
@@ -89,14 +97,13 @@ export default {
           'selectPlay'
       ])
   },
-  watch:{
+watch:{
       scrollY(newVal){ //watch实时监听scrollY方向的新值
-          let zIndex = 0
-          let scale = 0
-          let blur = 0
-          this.translateY = Math.max(this.minTranslateY,newVal)
-          this.$refs.layer.style['transform'] = `translate3d(0,${this.translateY}px,0)`
-          const percent = Math.abs(newVal / this.imageHeight) 
+        let translateY = Math.max(this.miniTranslateY, newVal)
+        let scale = 1
+        let zIndex = 0
+        let blur = 0
+        const percent = Math.abs(newVal / this.imageHeight)
           //因为下拉时newVal 增加.要形成无缝放大的效果需要除以图片高度,算出比例
           if(newVal >0){
               scale = 1+percent
@@ -104,7 +111,9 @@ export default {
           }else{
              blur = Math.min(20 * percent*20)
           }
-          if (newVal < this.minTransalteY) {
+        this.$refs.layer.style['transform'] = `translate3d(0,${translateY}px,0)`
+        this.$refs.filter.style[backdrop] = `blur(${blur}px)`
+          if (newVal < this.miniTranslateY) {
         //如果Scroll元素 Y正方向的偏移量 达到图片位置,(越向上越小)
           zIndex = 10
           this.$refs.bgImage.style.paddingTop = 0
@@ -117,7 +126,6 @@ export default {
         }
         this.$refs.bgImage.style[transform] = `scale(${scale})`
         this.$refs.bgImage.style.zIndex = zIndex
-        this.$refs.filter.style[backdrop]= `blur(${blur}px)`
       }
       }
   }
@@ -205,7 +213,7 @@ export default {
       background: $color-background
       .song-list-wrapper
         padding: 20px 30px
-      .loadding-ct
+      .loading-container
         position: absolute
         width: 100%
         top: 50%

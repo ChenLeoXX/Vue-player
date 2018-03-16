@@ -1,5 +1,5 @@
 <template>
-    <div class="recommend" ref="recommend">
+    <div class="recommend" ref="recommend" :data="disclist">
           <scroll ref="scroll" class="recommend-content" :data="disclist">
           <div>
         <!-- 这里的v-if为了等数据到来后才去渲染slider组件 ,否则会直接渲染slider,这时候数据可能还没到来,不能正确渲染-->
@@ -70,7 +70,6 @@ export default {
     _getRecommendDiscList(){
       getDiscList().then((res)=>{
         if(res.code === ERR_OK){
-          console.log(res.data.list)
           this.disclist = res.data.list
         }
       })
@@ -90,7 +89,6 @@ export default {
       this.$router.push({
         path:`/recommend/${item.dissid}`
       })
-      console.log(item)
       this.setDisc(item)
     },
     ...mapMutations({
