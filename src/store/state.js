@@ -5,6 +5,7 @@ const state = {
     playList:[],
     sequenceList:[],
     mode:playMode.squence,
-    currentIndex: -1
+    currentIndex: -1,
+    disc:{}
 }
 export default state

@@ -15,11 +15,13 @@
       </div>
       <div class="bg-layer" ref="layer"></div>
       <!-- 监听scroll事件给bg-layer赋值,让它在Y方向偏移处于list上方的位置形成向上滑动的效果 -->
-      <scroll @scroll="scroll" ref="lsit" :listen-scorll="listenScroll" :probe-type="probeType" :data="songs"> 
+      <scroll @scroll="scroll" ref="list" :listen-scorll="listenScroll" :probe-type="probeType" :data="songs"> 
           <div class="song-list-wrapper">
-          <song-list :songs="songs"></song-list>
+          <song-list :songs="songs" @select="selectItem"></song-list>
           </div>
-          <div class="loadding-container" v-show="!songs.length"></div>
+          <div class="loadding-ct" v-show="!songs.length">
+              <loadding></loadding>
+          </div>
       </scroll>
   </div>
 </template>
@@ -28,6 +30,7 @@ import Scroll from 'base/scroll/scroll'
 import SongList from 'base/songlist/songlist'
 import Loadding from 'base/loadding/loadding'
 import {prefix} from 'common/js/dom'
+import {mapActions} from 'vuex'
 const transform = prefix('transform')
 const backdrop = prefix('backdrop-filter')
 const RESERVED_HEIGHT = 40//保留高度
@@ -62,7 +65,7 @@ export default {
       this.imageHeight =  this.$refs.bgImage.clientHeight //记录图片高
       this.minTranslateY =   -this.imageHeight + RESERVED_HEIGHT 
       //Y正方向上最小的偏移值
-      this.$refs.list.el.style.top = this.imageHeight + 'px'
+      this.$refs.list.$el.style.top = this.imageHeight + 'px'
       //让滚动组件距离和图片错开
   },
   created(){
@@ -74,8 +77,17 @@ export default {
         this.scrollY = pos.y
       },
       back(){//路由回退
-          this.$route.back()
-      }
+          this.$router.back()
+      },
+      selectItem(song,index){
+          this.selectPlay({
+              list:this.songs,
+              index:index
+          })
+      },
+      ...mapActions([
+          'selectPlay'
+      ])
   },
   watch:{
       scrollY(newVal){ //watch实时监听scrollY方向的新值
@@ -193,7 +205,7 @@ export default {
       background: $color-background
       .song-list-wrapper
         padding: 20px 30px
-      .loading-container
+      .loadding-ct
         position: absolute
         width: 100%
         top: 50%
