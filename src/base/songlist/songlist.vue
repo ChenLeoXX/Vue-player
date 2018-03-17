@@ -25,7 +25,7 @@ export default {
       },
       selectItem(song,index){//告诉父组件,点击了的歌曲信息,和索引
         this.$emit('select',song,index)
-      }
+      },
   }
 }
 </script>

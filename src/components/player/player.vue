@@ -1,37 +1,45 @@
 <template>
-  <div class="player" v-show="playList.length >0">
+  <div class="player" v-show="playList.length > 0">
+    <transition name="normal">
       <div class="normal-player" v-show="fullScreen">
         <div class="background">
-          <img src="" width="100%" height="100%">
+          <img :src="currentSong.image" width="100%" height="100%">
         </div>
         <div class="top">
           <div class="back">
-            <i class="icon-back"></i>
+            <i class="icon-back" @click="back"></i>
           </div>
-          <h1 class="title"></h1>
-          <h2 class="subtitle"></h2>
+          <h1 class="title" v-html="currentSong.name"></h1>
+          <h2 class="subtitle" v-html="currentSong.singer"></h2>
         </div>
         <div class="middle">
           <div class="middle-l">
            <div class="cd-wrapper">
               <div class="cd">
-              <img class="image">
+              <img class="image" :src="currentSong.image" :class="cdRotate">
             </div>
            </div>
           </div>
         </div>
         <div class="bottom">
+          <div class="progress-wrapper">
+            <span class="time time-l">{{format(currentTime)}}</span>
+            <div class="progress-bar-wrapper">
+              <progress-bar :percent="percent"></progress-bar>
+            </div>
+            <span class="time time-r">{{format(currentSong.duration)}}</span>
+          </div>
           <div class="operators">
             <div class="icon i-left">
               <i class="icon-sequence"></i>
             </div>
-            <div class="icon i-left">
+            <div class="icon i-left" @click="prev" :class="disableCls">
               <i class="icon-prev"></i>
             </div>
-            <div class="icon i-center">
-              <i class="icon-play"></i>
+            <div class="icon i-center" @click="togglePlay" :class="disableCls">
+              <i :class="playIcon"></i>
             </div>
-            <div class="icon i-right">
+            <div class="icon i-right" @click="next" :class="disableCls">
               <i class="icon-next"></i>
             </div>
             <div class="icon i-right">
@@ -40,31 +48,144 @@
           </div>
         </div>
       </div>
-      <div class="mini-player" v-show="!fullScreen">
+      </transition>
+      <transition name="mini">
+      <div class="mini-player" v-show="!fullScreen" @click="open">
         <div class="icon">
-          <img width="40" height="40">
+         <div class="imgWrapper">
+            <img width="40" height="40" :src="currentSong.image" :class="cdRotate">
+         </div>
         </div>
         <div class="text">
-          <h2 class="name"></h2>
-          <p class="desc"></p>
+          <h2 class="name" v-html="currentSong.name"></h2>
+          <p class="desc" v-html="currentSong.singer"></p>
         </div>
-        <div class="control">          
+        <div class="control" @click.stop="togglePlay">     
+          <i :class="miniIcon"></i>     
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
         </div>
       </div>
+      </transition>
+        <audio @canplay="readyPlay" @error="songError" ref="audio"
+               @timeupdate="updateTime" 
+        :src="currentSong.url"></audio>      
   </div>
 </template>
 <script>
 import {mapGetters} from 'vuex'
+import {mapMutations} from 'vuex'
+import  ProgressBar from 'base/progress-bar/progress-bar'
 export default {
   name:"player",
+  data(){
+    return{
+      isSongReady:false,
+      currentTime:'0'
+    }
+  },
   computed:{
+      cdRotate(){return this.playing? `play` : `pause`},
+      playIcon(){ return this.playing ? 'icon-pause' : 'icon-play'},
+      miniIcon() {
+        return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+      },
+      disableCls(){
+        return this.isSongReady ? '' : 'disable'
+      },
+      percent(){
+        return this.currentTime / this.currentSong.duration
+      },      
       ...mapGetters([
           'fullScreen',
-          'playList'
+          'playList',
+          'currentSong',
+          'playing',
+          'currentIndex'
       ])
+  },  
+  watch:{
+    currentSong(){//点击后监听currentSong实现自动播放
+      this.$nextTick(()=>{ //这里也会触发mutation,把playing变成true
+        //这里调用$nextTick因为当currentSong改变时,audio的DOM,SRC请求还没load,如果
+        // 直接调用它的play方法,是冲突的,应该放在nextTick里当dom发生变化后立即调用.
+        this.$refs.audio.play()
+      })
+    },
+    playing(newPlaying){//播放暂停切换
+      let audio =this.$refs.audio
+      this.$nextTick(()=>{
+        newPlaying ? audio.play() : audio.pause()
+      })
+    }
+  },
+  methods:{
+    back(){//退出全屏
+      this.setFullScreen(false)
+    },
+    open(){//全屏
+      this.setFullScreen(true)
+    },
+    prev(){//顺序播放下一首
+      if(!this.isSongReady){
+        return 
+      }
+      let currentIndex = this.currentIndex -1 
+      if(currentIndex === -1 ){
+         currentIndex = this.playList.length + 1
+      }
+      this.setCurrentIndex(currentIndex)
+      this.isSongReady = false
+      if(!this.playing){
+        this.togglePlay()
+      }
+    },
+    next(){//顺序播放上一首
+      if(!this.isSongReady){
+        return 
+      }    
+      let currentIndex = this.currentIndex + 1 
+      if(currentIndex === this.playList.length +1){
+         currentIndex = 0
+      }
+      this.setCurrentIndex(currentIndex)
+      this.isSongReady = false
+      if(!this.playing){
+        this.togglePlay()
+      }      
+    },
+    togglePlay(){//播放和暂停状态切换
+      if(!this.playing){
+        this.setPlayingState(true)
+      }else{
+        this.setPlayingState(false)
+      }
+    },
+    readyPlay(){
+      this.isSongReady =true
+    },
+    songError(){
+      this.isSongReady = true
+    },
+    updateTime(e){
+      this.currentTime = e.target.currentTime
+    },
+    format(songTime){//初始化歌曲时间
+      let time = songTime | 0 // 这个运算符用于去除小数和Math.floor差不多
+      let minute = time / 60 | 0
+      let second = time % 60
+      second =  second.toString().length === 2 ? second : '0' +second
+      return `${minute}:${second}`
+    },
+    ...mapMutations({
+      setFullScreen:'SET_FULL_SCREEN',
+      setPlayingState:'SET_PLAYING_STATE',
+      setCurrentIndex:'SET_CURRENT_INDEX'
+    })
+  },
+  components:{
+    ProgressBar
   }
 }
 </script>
@@ -212,7 +333,7 @@ export default {
           padding: 10px 0
           .time
             color: $color-text
-            font-size: $font-size-small
+            font-size: $font-size-medium
             flex: 0 0 30px
             line-height: 30px
             width: 30px
