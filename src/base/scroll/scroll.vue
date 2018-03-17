@@ -16,13 +16,13 @@
         type: Number,
         default: 1
       },
-      click: {
-        type: Boolean,
-        default: false
-      },
       listenScroll: {
         type: Boolean,
         default: true
+      },
+      click: {
+        type: Boolean,
+        default: false
       },
       data: {
         type: Array,

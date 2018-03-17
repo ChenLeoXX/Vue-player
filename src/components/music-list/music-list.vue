@@ -76,8 +76,8 @@ export default {
       //让滚动组件距离和图片错开
   },
   created(){
-      this.probeType = 3 //better-scroll 属性
       this.listenScroll = true
+      this.probeType = 3 
   },
   methods:{
       scroll(pos){//监听了scroll的值
@@ -87,7 +87,6 @@ export default {
           this.$router.back()
       },
       selectItem(song,index){
-          console.log(index)
           this.selectPlay({
               list:this.songs,
               index:index
