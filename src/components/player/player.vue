@@ -25,7 +25,9 @@
           <div class="progress-wrapper">
             <span class="time time-l">{{format(currentTime)}}</span>
             <div class="progress-bar-wrapper">
-              <progress-bar :percent="percent"></progress-bar>
+              <progress-bar :percent="percent" @touchEnd="onTouchEnd"
+                                               @changeTime="changeCurrentTime" 
+              ></progress-bar>
             </div>
             <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
@@ -177,6 +179,16 @@ export default {
       let second = time % 60
       second =  second.toString().length === 2 ? second : '0' +second
       return `${minute}:${second}`
+    },
+    onTouchEnd(percent){//根据拖动计算进度
+      this.$refs.audio.currentTime = this.currentSong.duration * percent
+      if(!this.playing){
+        this.togglePlay()
+      }
+    },
+    changeCurrentTime(percent){//根据拖动返回百分比改变当前时间
+       this.togglePlay()
+      this.$refs.audio.currentTime =  this.currentSong.duration * percent
     },
     ...mapMutations({
       setFullScreen:'SET_FULL_SCREEN',
