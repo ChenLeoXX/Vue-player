@@ -8,7 +8,7 @@
           <div class="play-wrapper">
               <div class="play" ref='playBtn'>
                   <i class="icon-play" v-show="songs.length>0"></i>
-                  <span class="text">随机播放全部</span>
+                  <span class="text" @click="randomPlay">随机播放全部</span>
               </div>
           </div>
           <div class="filter" ref='filter'></div>
@@ -65,7 +65,7 @@ export default {
   computed:{
       bgStyle(){
           return `background-image:url(${this.bgImage})`          
-      }
+      },
   },
   mounted(){//refs.list 是一个组件所以要丶el获取元素.
       this.imageHeight =  this.$refs.bgImage.clientHeight //记录图片高
@@ -87,11 +87,17 @@ export default {
           this.$router.back()
       },
       selectItem(song,index){
-          console.log(index)
           this.selectPlay({
               list:this.songs,
               index:index
           })
+      },
+      randomPlay(){
+       let index = Math.random() * this.songs.length | 0
+        this.selectPlay({
+            list:this.songs,
+            index:index
+        })
       },
       ...mapActions([
           'selectPlay'
