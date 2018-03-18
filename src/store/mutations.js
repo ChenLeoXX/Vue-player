@@ -22,7 +22,10 @@ const mutations = {
       },
       [types.SET_CURRENT_INDEX](state,index){
         state.currentIndex=index
-      }    
+      },
+      [types.SET_MODE_TOTAS](state,boolean){
+        state.modeChange = boolean
+      }   
     
 }
 export default mutations

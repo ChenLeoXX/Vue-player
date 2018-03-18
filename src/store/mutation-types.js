@@ -11,3 +11,5 @@ export const SET_PLAY_MODE = 'SET_PLAY_MODE'
 export const SET_CURRENT_INDEX = 'SET_CURRENT_INDEX'
 
 export const SET_DISC = 'SET_DISC'
+
+export const SET_MODE_TOTAS = 'SET_MODE_TOTAS'

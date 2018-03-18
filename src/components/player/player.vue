@@ -2,6 +2,7 @@
   <div class="player" v-show="playList.length > 0">
     <transition name="normal">
       <div class="normal-player" v-show="fullScreen">
+        <totas :msgType="msgType" v-if="this.modeChange"></totas>       
         <div class="background">
           <img :src="currentSong.image" width="100%" height="100%">
         </div>
@@ -33,16 +34,16 @@
           </div>
           <div class="operators">
             <div class="icon i-left">
-              <i class="icon-sequence"></i>
+              <i :class="playMode" @click="changeMode"></i>
             </div>
-            <div class="icon i-left" @click="prev" :class="disableCls">
-              <i class="icon-prev"></i>
+            <div class="icon i-left" :class="disableCls">
+              <i class="icon-prev" @click="prev"></i>
             </div>
-            <div class="icon i-center" @click="togglePlay" :class="disableCls">
-              <i :class="playIcon"></i>
+            <div class="icon i-center" :class="disableCls">
+              <i :class="playIcon" @click="togglePlay"></i>
             </div>
-            <div class="icon i-right" @click="next" :class="disableCls">
-              <i class="icon-next"></i>
+            <div class="icon i-right" :class="disableCls">
+              <i class="icon-next" @click="next"></i>
             </div>
             <div class="icon i-right">
               <i class="icon icon-not-favorite"></i>
@@ -79,6 +80,9 @@ import {mapGetters} from 'vuex'
 import {mapMutations} from 'vuex'
 import  ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
+import Totas from 'base/totas/totas'
+import {playMode} from 'common/js/config'
+import {shuffle} from 'common/js/util'
 export default {
   name:"player",
   data(){
@@ -99,17 +103,27 @@ export default {
       },
       percent(){
         return this.currentTime / this.currentSong.duration
-      },      
+      },
+      playMode(){
+        return this.mode === playMode.sequence? 'icon-sequence' : this.mode === playMode.random ? 'icon-random': this.mode === playMode.loop ? 'icon-loop' : false
+      },
+      msgType(){
+        return this.mode === playMode.sequence? '顺序播放' : this.mode === playMode.loop? '单曲循环' : this.mode === playMode.random ? '随机播放' : false
+      },     
       ...mapGetters([
           'fullScreen',
           'playList',
           'currentSong',
           'playing',
-          'currentIndex'
+          'currentIndex',
+          'mode',
+          'sequenceList',
+          'modeChange'
       ])
   },  
   watch:{
-    currentSong(){//点击后监听currentSong实现自动播放
+    currentSong(newSong,oldSong){//点击后监听currentSong实现自动播放
+      if(!newSong.id || !newSong.url || newSong.id === oldSong.id) return //这里做一个取消逻辑,当播放模式切换的时候在暂停时不要播放歌曲.
       this.$nextTick(()=>{ //这里也会触发mutation,把playing变成true
         //这里调用$nextTick因为当currentSong改变时,audio的DOM,SRC请求还没load,如果
         // 直接调用它的play方法,是冲突的,应该放在nextTick里当dom发生变化后立即调用.
@@ -122,6 +136,10 @@ export default {
         newPlaying ? audio.play() : audio.pause()
       })
     }
+  },
+  mounted(){
+    console.log(this.modeChange)
+    this.setModeTotas(true)
   },
   methods:{
     back(){//退出全屏
@@ -191,15 +209,38 @@ export default {
        this.togglePlay()
       this.$refs.audio.currentTime =  this.currentSong.duration * percent
     },
+    changeMode(){
+      this.setModeTotas(true)
+      let newMode = (this.mode + 1) % 3
+      this.setCurrentMode(newMode)
+      let list = null
+      if(this.mode === playMode.random){//随机播放逻辑 
+         list = shuffle(this.sequenceList)
+      }else{
+        list = this.sequenceList
+      }      
+      this.resetCurrentIndex(list)
+      this.setPlayList(list)
+    },
+    resetCurrentIndex(list){//ES6 语法找到数组中符合函数条件的元素索引
+      let index = list.findIndex((item)=>{
+        return item.id === this.currentSong.id
+      })
+      this.setCurrentIndex(index)
+    },
     ...mapMutations({
       setFullScreen:'SET_FULL_SCREEN',
       setPlayingState:'SET_PLAYING_STATE',
-      setCurrentIndex:'SET_CURRENT_INDEX'
-    })
+      setCurrentIndex:'SET_CURRENT_INDEX',
+      setCurrentMode :'SET_PLAY_MODE',
+      setPlayList:'SET_PLAYLIST',
+      setModeTotas: 'SET_MODE_TOTAS'
+    }),
   },
   components:{
     ProgressBar,
-    ProgressCircle
+    ProgressCircle,
+    Totas
   }
 }
 </script>

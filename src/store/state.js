@@ -4,7 +4,8 @@ const state = {
     fullScreen:false,
     playList:[],
     sequenceList:[],
-    mode:playMode.squence,
+    mode:0,
+    modeChange:false,
     currentIndex: -1,
     disc:{}
 }
