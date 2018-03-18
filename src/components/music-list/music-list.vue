@@ -8,7 +8,7 @@
           <div class="play-wrapper">
               <div class="play" ref='playBtn'>
                   <i class="icon-play" v-show="songs.length>0"></i>
-                  <span class="text" @click="randomPlay">随机播放全部</span>
+                  <span class="text" @click="randomPlayAll">随机播放全部</span>
               </div>
           </div>
           <div class="filter" ref='filter'></div>
@@ -92,15 +92,14 @@ export default {
               index:index
           })
       },
-      randomPlay(){
-       let index = Math.random() * this.songs.length | 0
-        this.selectPlay({
-            list:this.songs,
-            index:index
-        })
+      randomPlayAll(){
+       this.randomPlay({
+           list:this.songs
+       })
       },
       ...mapActions([
-          'selectPlay'
+          'selectPlay',
+          'randomPlay'
       ])
   },
 watch:{

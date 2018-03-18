@@ -71,7 +71,8 @@
       </div>
       </transition>
         <audio @canplay="readyPlay" @error="songError" ref="audio"
-               @timeupdate="updateTime" 
+               @timeupdate="updateTime"
+               @ended="songEnd" 
         :src="currentSong.url"></audio>      
   </div>
 </template>
@@ -217,7 +218,7 @@ export default {
       if(this.mode === playMode.random){//随机播放逻辑 
          list = shuffle(this.sequenceList)
       }else{
-        list = this.sequenceList
+        list = this.sequenceList//切换回正常列表播放
       }      
       this.resetCurrentIndex(list)
       this.setPlayList(list)
@@ -227,6 +228,14 @@ export default {
         return item.id === this.currentSong.id
       })
       this.setCurrentIndex(index)
+    },
+    songEnd(){
+      if(this.mode === playMode.loop){
+        this.currentSong.currentTime = 0
+        this.$refs.audio.play()
+      }else{
+        this.next()
+      }
     },
     ...mapMutations({
       setFullScreen:'SET_FULL_SCREEN',
