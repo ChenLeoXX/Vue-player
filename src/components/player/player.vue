@@ -13,7 +13,11 @@
           <h1 class="title" v-html="currentSong.name"></h1>
           <h2 class="subtitle" v-html="currentSong.singer"></h2>
         </div>
-        <div class="middle">
+        <div class="middle"
+              @touchstart.prevent="lyricTouchStart"
+              @touchmove.prevent="lyricTouchMove"
+              @touchend="lyricTouchEnd"
+        >
           <div class="middle-l">
            <div class="cd-wrapper">
               <div class="cd">
@@ -21,8 +25,25 @@
             </div>
            </div>
           </div>
+          <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
+            <div class="lyric-wrapper">
+              <div v-if="currentLyric">
+                <p ref="lyricLine"
+                   class="text"
+                   :class="{'current': currentLineNum ===index}"
+                   v-for="(line,index) in currentLyric.lines" :key="index">{{line.txt}}</p>
+              </div>
+              <!-- <div class="pure-music" v-show="isPureMusic"> -->
+                <!-- <p>{{pureMusicLyric}}</p> -->
+              <!-- </div> -->
+            </div>
+          </scroll>          
         </div>
         <div class="bottom">
+          <div class="dot-wrapper">
+            <span class="dot" :class="{'active':currentShow==='cd'}"></span>
+            <span class="dot" :class="{'active':currentShow==='lyric'}"></span>
+          </div>          
           <div class="progress-wrapper">
             <span class="time time-l">{{format(currentTime)}}</span>
             <div class="progress-bar-wrapper">
@@ -84,14 +105,24 @@ import ProgressCircle from 'base/progress-circle/progress-circle'
 import Totas from 'base/totas/totas'
 import {playMode} from 'common/js/config'
 import {shuffle} from 'common/js/util'
+import Lyric from 'lyric-parser'
+import Scroll from 'base/scroll/scroll'
+import {prefix} from 'common/js/dom'
+const transform = prefix('transform')
 export default {
   name:"player",
   data(){
     return{
       isSongReady:false,
       currentTime:'0',
+      currentLyric: null,
+      currentLineNum: 0,
+      currentShow:'cd',      
       radius:32,
     }
+  },
+  created(){
+    this.touch={}//记录触摸信息
   },
   computed:{
       cdRotate(){return this.playing? `play` : `pause`},
@@ -130,6 +161,7 @@ export default {
         // 直接调用它的play方法,是冲突的,应该放在nextTick里当dom发生变化后立即调用.
         this.$refs.audio.play()
       })
+      this.getLyric()
     },
     playing(newPlaying){//播放暂停切换
       let audio =this.$refs.audio
@@ -149,13 +181,13 @@ export default {
     open(){//全屏
       this.setFullScreen(true)
     },
-    prev(){//顺序播放下一首
+    prev(){//顺序播放上一首
       if(!this.isSongReady){
         return 
       }
       let currentIndex = this.currentIndex -1 
       if(currentIndex === -1 ){
-         currentIndex = this.playList.length + 1
+         currentIndex = this.playList.length - 1
       }
       this.setCurrentIndex(currentIndex)
       this.isSongReady = false
@@ -163,12 +195,12 @@ export default {
         this.togglePlay()
       }
     },
-    next(){//顺序播放上一首
+    next(){//顺序播放下一首
       if(!this.isSongReady){
         return 
       }    
       let currentIndex = this.currentIndex + 1 
-      if(currentIndex === this.playList.length +1){
+      if(currentIndex === this.playList.length){
          currentIndex = 0
       }
       this.setCurrentIndex(currentIndex)
@@ -237,6 +269,49 @@ export default {
         this.next()
       }
     },
+    getLyric(){
+      this.currentSong.getLyric().then(lyric=>{
+        this.currentLyric = new Lyric(lyric,this.handlerLyric)//翻入lyric-parser解析
+        if(this.playing){
+          this.currentLyric.play()
+        }
+      })
+    },
+    handlerLyric({lineNum,txt}){
+        this.currentLineNum = lineNum
+        if(lineNum > 5){
+          let lineEl = this.$refs.lyricLine[lineNum - 5]
+          this.$refs.lyricList.scrollToElement(lineEl,1000)
+        } else{
+          this.$refs.lyricList.scrollTo(0,0,1000)
+        }     
+    },
+    lyricTouchStart(e){//歌词滑动记录一开始点击滑动信息
+      this.touch.inited = true
+      this.touch.move = false
+      const touch  = e.touches[0]
+      this.touch.startX = touch.pageX
+      this.touch.startY = touch.pageY
+    },
+    lyricTouchMove(e){//歌词滑动记录与开始滑动时X,Y轴增量
+      if(!this.touch.inited){
+        return
+      }
+      const touch = e.touches[0]
+      const deltaX = touch.pageX - this.touch.startX 
+      const deltaY = touch.pageY - this.touch.startY 
+      if(Math.abs(deltaY) > Math.abs(deltaX)) return //取消向下滑动            
+      if(!this.touch.moved) {
+        this.touch.moved = true
+      }
+      const left = this.currentShow === 'cd'? 0 : -window.innerWidth//确定歌词页的位置
+      const offsetWidth = Math.min(0,Math.max(-window.innerWidth,left+deltaX))//确定滑动的最值,不超过屏幕宽度,但可以出现滑动
+      this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px,0,0)`
+      this.touch.percent = Math.abs(offsetWidth / window.innerWidth)
+    },
+    lyricTouchEnd(){
+
+    }, 
     ...mapMutations({
       setFullScreen:'SET_FULL_SCREEN',
       setPlayingState:'SET_PLAYING_STATE',
@@ -249,7 +324,8 @@ export default {
   components:{
     ProgressBar,
     ProgressCircle,
-    Totas
+    Totas,
+    Scroll
   }
 }
 </script>

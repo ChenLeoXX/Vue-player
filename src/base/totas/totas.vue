@@ -17,7 +17,7 @@ export default {
   mounted(){
   setTimeout(()=>{
        this.setModeTotas(false)
-    },2000)      
+    },1000)      
   },
   methods:{
       ...mapMutations({

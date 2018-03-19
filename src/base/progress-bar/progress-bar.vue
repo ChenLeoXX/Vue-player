@@ -30,7 +30,7 @@ export default {
   },
   watch:{//percent是变化的所以用watch
       percent(newPercent){//依赖父元素当前歌曲播放时间和总时间百分比
-        if(newPercent > 0 && this.touch.inited){//设置权限,在touch时不应该计算percent值,解决进度条跳动
+        if(newPercent > 0 && !this.touch.inited){//设置权限,在touch时不应该计算percent值,解决进度条跳动
             let progressWidth =  this.$refs.progressBar.clientWidth - ProgressBtn
             let offsetPercent = progressWidth * newPercent
             this.countOffset(offsetPercent)            
@@ -39,12 +39,12 @@ export default {
   },
   methods:{
       progressTouchStart(e){
-        this.touch.inited =false//加锁标记
+        this.touch.inited =true//加锁标记
         this.touch.startX = e.touches[0].pageX//记录点击位置X坐标
         this.touch.left = this.$refs.progress.clientWidth //记录内部进度条目前长度
       },
       progressTouchMove(e){
-        if(this.touch.inited){
+        if(!this.touch.inited){
             return
         }
         const deltaX = e.touches[0].pageX - this.touch.startX  
@@ -56,7 +56,7 @@ export default {
         this.$emit('changeTime',percent)
       },
       progressTouchEnd(){
-          this.touch.inited = true
+          this.touch.inited = false
           this.onTouch()
       },
       countOffset(offsetPercent){
