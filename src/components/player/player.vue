@@ -36,9 +36,9 @@
                    :class="{'current': currentLineNum ===index}"
                    v-for="(line,index) in currentLyric.lines" :key="index">{{line.txt}}</p>
               </div>
-              <!-- <div class="pure-music" v-show="isPureMusic"> -->
-                <!-- <p>{{pureMusicLyric}}</p> -->
-              <!-- </div> -->
+              <div class="pure-music" v-show="isPureMusic">
+                <p>{{pureMusicLyric}}</p>
+              </div>
             </div>
           </scroll>          
         </div>
@@ -113,6 +113,7 @@ import Scroll from 'base/scroll/scroll'
 import {prefix} from 'common/js/dom'
 const transform = prefix('transform')
 const transitionDuration = prefix('transitionDuration')
+const timeExp = /\[(\d{2}):(\d{2}):(\d{2})]/g
 export default {
   name:"player",
   data(){
@@ -123,7 +124,9 @@ export default {
       currentLineNum: 0,
       currentShow:'cd',      
       radius:32,
-      playingLyric:""
+      playingLyric:"",
+      isPureMusic:false,
+      pureMusicLyric: ''
     }
   },
   created(){
@@ -305,6 +308,12 @@ export default {
     getLyric(){
       this.currentSong.getLyric().then(lyric=>{
         this.currentLyric = new Lyric(lyric,this.handlerLyric)//翻入lyric-parser解析
+        this.isPureMusic = !this.currentLyric.lines.length
+        if (this.isPureMusic) {
+          this.pureMusicLyric = this.currentLyric.lrc.replace(timeExp, '').trim()
+          console.log(this.currentLyric.lrc.replace(timeExp, '').trim())
+          this.playingLyric = this.pureMusicLyric
+        }        
         if(this.playing){
           this.currentLyric.play()//当播放的时候调用,Lyric构造函数的回调handlerLyric
         }
