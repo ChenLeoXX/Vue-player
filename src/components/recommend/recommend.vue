@@ -42,7 +42,9 @@ import Slider from 'base/slider/slider'
 import Scroll from 'base/scroll/scroll'
 import Loadding from 'base/loadding/loadding'
 import {mapMutations} from 'vuex'
+import {playListMixin} from 'common/js/mixin'
 export default {
+  mixins:[playListMixin],
   name:"recommend",
   components:{
     Slider,
@@ -91,6 +93,11 @@ export default {
       })
       this.setDisc(item)
     },
+    handlePlayList(playList){//利用mixin方法,复用一些组件方法,适配播放器底部距离
+      const bottom= playList.length > 0 ? '60px' :''
+      this.$refs.recommend.style.bottom = bottom
+      this.$refs.scroll.refresh()
+    },    
     ...mapMutations({
       setDisc:'SET_DISC'
     })

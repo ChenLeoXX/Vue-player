@@ -32,12 +32,13 @@ import SongList from 'base/songlist/songlist'
 import Loadding from 'base/loadding/loadding'
 import {prefix} from 'common/js/dom'
 import {mapActions} from 'vuex'
-
+import {playListMixin} from 'common/js/mixin'
 const transform = prefix('transform')
 const backdrop = prefix('backdrop-filter')
 const RESERVED_HEIGHT = 40//保留高度
 export default {
   name:"music-list",
+  mixins:[playListMixin],
   components:{
       Scroll,
       SongList,
@@ -96,6 +97,11 @@ export default {
        this.randomPlay({
            list:this.songs
        })
+      },
+      handlePlayList(){//利用mixin方法,复用一些组件方法,适配播放器底部距离
+       const bottom= this.playList.length > 0 ? '60px' :''
+       this.$refs.list.$el.style.bottom = bottom
+       this.$refs.list.refresh()
       },
       ...mapActions([
           'selectPlay',

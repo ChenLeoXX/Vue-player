@@ -18,11 +18,14 @@
               @touchmove.prevent="lyricTouchMove"
               @touchend="lyricTouchEnd"
         >
-          <div class="middle-l">
+          <div class="middle-l" ref='cd'>
            <div class="cd-wrapper">
               <div class="cd">
               <img class="image" :src="currentSong.image" :class="cdRotate">
             </div>
+           </div>
+           <div class="playing-lyric-wrapper">
+              <div class="playing-lyric">{{playingLyric}}</div>
            </div>
           </div>
           <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
@@ -109,6 +112,7 @@ import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
 import {prefix} from 'common/js/dom'
 const transform = prefix('transform')
+const transitionDuration = prefix('transitionDuration')
 export default {
   name:"player",
   data(){
@@ -119,6 +123,7 @@ export default {
       currentLineNum: 0,
       currentShow:'cd',      
       radius:32,
+      playingLyric:""
     }
   },
   created(){
@@ -156,12 +161,21 @@ export default {
   watch:{
     currentSong(newSong,oldSong){//点击后监听currentSong实现自动播放
       if(!newSong.id || !newSong.url || newSong.id === oldSong.id) return //这里做一个取消逻辑,当播放模式切换的时候在暂停时不要播放歌曲.
-      this.$nextTick(()=>{ //这里也会触发mutation,把playing变成true
-        //这里调用$nextTick因为当currentSong改变时,audio的DOM,SRC请求还没load,如果
-        // 直接调用它的play方法,是冲突的,应该放在nextTick里当dom发生变化后立即调用.
-        this.$refs.audio.play()
+      if(this.currentLyric){
+        this.currentLyric.stop()
+        //重置歌词对象
+          this.currentLyric = null
+          this.currentTime = 0
+          this.playingLyric = ''
+          this.currentLineNum = 0        
+      }
+//这里也会触发mutation,把playing变成true
+//这里调用$nextTick因为当currentSong改变时,audio的DOM,SRC请求还没load,如果
+// 直接调用它的play方法,是冲突的,应该放在nextTick里当dom发生变化后立即调用.      
+      this.$nextTick(()=>{              
+        this.$refs.audio.play()                           
+        this.getLyric()
       })
-      this.getLyric()
     },
     playing(newPlaying){//播放暂停切换
       let audio =this.$refs.audio
@@ -185,6 +199,10 @@ export default {
       if(!this.isSongReady){
         return 
       }
+      if(this.playList.length === 1) {
+        this.loop()
+        return
+      }       
       let currentIndex = this.currentIndex -1 
       if(currentIndex === -1 ){
          currentIndex = this.playList.length - 1
@@ -198,7 +216,11 @@ export default {
     next(){//顺序播放下一首
       if(!this.isSongReady){
         return 
-      }    
+      }
+      if(this.playList.length === 1) {//如果列表只有一首歌那么就循环播放
+        this.loop()
+        return
+      }   
       let currentIndex = this.currentIndex + 1 
       if(currentIndex === this.playList.length){
          currentIndex = 0
@@ -214,6 +236,9 @@ export default {
         this.setPlayingState(true)
       }else{
         this.setPlayingState(false)
+      }
+      if(this.currentLyric){//歌曲暂停歌词停止滚动
+        this.currentLyric.togglePlay()  
       }
     },
     readyPlay(){
@@ -233,16 +258,20 @@ export default {
       return `${minute}:${second}`
     },
     onTouchEnd(percent){//根据拖动计算进度
-      this.$refs.audio.currentTime = this.currentSong.duration * percent
+     const currentTime = this.currentSong.duration * percent
+      this.$refs.audio.currentTime = currentTime
       if(!this.playing){
         this.togglePlay()
+      }
+      if(this.currentLyric){
+        this.currentLyric.seek(currentTime *1000) //实现拖动进度,歌词对应相对进度
       }
     },
     changeCurrentTime(percent){//根据拖动返回百分比改变当前时间
        this.togglePlay()
       this.$refs.audio.currentTime =  this.currentSong.duration * percent
     },
-    changeMode(){
+    changeMode(){//播放模式切换
       this.setModeTotas(true)
       let newMode = (this.mode + 1) % 3
       this.setCurrentMode(newMode)
@@ -261,10 +290,14 @@ export default {
       })
       this.setCurrentIndex(index)
     },
-    songEnd(){
-      if(this.mode === playMode.loop){
+    loop(){
         this.currentSong.currentTime = 0
         this.$refs.audio.play()
+        this.currentLyric.seek(0)      
+    },
+    songEnd(){//歌曲播放结束判断逻辑
+      if(this.mode === playMode.loop){
+        this.loop()
       }else{
         this.next()
       }
@@ -273,11 +306,15 @@ export default {
       this.currentSong.getLyric().then(lyric=>{
         this.currentLyric = new Lyric(lyric,this.handlerLyric)//翻入lyric-parser解析
         if(this.playing){
-          this.currentLyric.play()
+          this.currentLyric.play()//当播放的时候调用,Lyric构造函数的回调handlerLyric
         }
+      }).catch(()=>{
+        this.currentLyric = null
+        this.currentTime  = 0
+        this.playingLyric = ''
       })
     },
-    handlerLyric({lineNum,txt}){
+    handlerLyric({lineNum,txt}){//操作歌词滚动,保持歌词在中间部分
         this.currentLineNum = lineNum
         if(lineNum > 5){
           let lineEl = this.$refs.lyricLine[lineNum - 5]
@@ -285,10 +322,11 @@ export default {
         } else{
           this.$refs.lyricList.scrollTo(0,0,1000)
         }     
+        this.playingLyric = txt
     },
     lyricTouchStart(e){//歌词滑动记录一开始点击滑动信息
       this.touch.inited = true
-      this.touch.move = false
+      this.touch.moved = false
       const touch  = e.touches[0]
       this.touch.startX = touch.pageX
       this.touch.startY = touch.pageY
@@ -308,9 +346,36 @@ export default {
       const offsetWidth = Math.min(0,Math.max(-window.innerWidth,left+deltaX))//确定滑动的最值,不超过屏幕宽度,但可以出现滑动
       this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px,0,0)`
       this.touch.percent = Math.abs(offsetWidth / window.innerWidth)
+      this.$refs.cd.style.opacity = 1 - this.touch.percent
     },
-    lyricTouchEnd(){
-
+    lyricTouchEnd(){//滑动结束判断滑动增量切换歌词和cd页面
+        if (!this.touch.moved) {
+          return
+        }    
+      let time = 300
+      let offsetWidth 
+      if(this.currentShow === 'cd'){
+        if(this.touch.percent >= 0.1){
+            offsetWidth = -window.innerWidth
+             this.$refs.cd.style.opacity = 0   
+             this.currentShow = 'lyric' 
+        }else{
+          offsetWidth = 0
+          this.$refs.cd.style.opacity = 1       
+        }
+      }else{
+            if(this.touch.percent < 0.9){
+                 offsetWidth = 0
+                 this.$refs.cd.style.opacity = 1
+                 this.currentShow = 'cd'
+            }else{
+                 offsetWidth = -window.innerWidth
+                 this.$refs.cd.style.opacity = 0
+            }
+      }
+          this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px,0,0)`
+          this.$refs.lyricList.$el.style[transitionDuration] = `${time}ms`
+          this.$refs.cd.style[transitionDuration] = `${time}ms`
     }, 
     ...mapMutations({
       setFullScreen:'SET_FULL_SCREEN',
