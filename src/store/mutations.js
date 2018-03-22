@@ -25,7 +25,9 @@ const mutations = {
       },
       [types.SET_MODE_TOTAS](state,boolean){
         state.modeChange = boolean
+      },
+      [types.SET_TOP_LIST](state,toplist){
+        state.topList = toplist
       }   
-    
 }
 export default mutations

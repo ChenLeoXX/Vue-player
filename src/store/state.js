@@ -7,6 +7,7 @@ const state = {
     mode:0,
     modeChange:false,
     currentIndex: -1,
-    disc:{}
+    disc:{},
+    topList:{}
 }
 export default state

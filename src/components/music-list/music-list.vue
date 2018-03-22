@@ -18,7 +18,7 @@
       <scroll :data="songs" class="list" @scroll="scroll" 
       ref="list" :listenScorll="listenScroll" :probe-type="probeType"> 
           <div class="song-list-wrapper">
-          <song-list :songs="songs" @select="selectItem"></song-list>
+          <song-list :songs="songs" @select="selectItem" :rank="rank"></song-list>
           </div>
           <div class="loading-container" v-show="!songs.length">
               <loadding></loadding>
@@ -56,6 +56,10 @@ export default {
       bgImage:{
           type:String,
           default:''
+      },
+      rank:{
+          type:Boolean,
+          default:false
       }
   },
   data() {
