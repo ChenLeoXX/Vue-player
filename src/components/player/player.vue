@@ -311,7 +311,7 @@ export default {
         this.isPureMusic = !this.currentLyric.lines.length
         if (this.isPureMusic) {
           this.pureMusicLyric = this.currentLyric.lrc.replace(timeExp, '').trim()
-          console.log(this.currentLyric.lrc.replace(timeExp, '').trim())
+        this.currentLyric.lrc.replace(timeExp, '').trim()
           this.playingLyric = this.pureMusicLyric
         }        
         if(this.playing){

@@ -3,14 +3,14 @@
     <i class="icon-search"></i>
     <input ref="query" v-model="query" class="box" :placeholder="placeholder"/>
     <i @click="clear" v-show="query" class="icon-dismiss"></i>
-  </div>  
+</div> 
 </template>
 <script>
 export default {
   props:{
       placeholder:{
           type:String,
-          default:'搜索歌曲,歌手'
+          default:'搜索歌曲'
       }
   },
   created(){
