@@ -1,5 +1,10 @@
 <template>
-  <div class="suggest">
+  <scroll class="suggest"
+          :data="result"
+          :pullup="pullUp"
+          @scrollToEnd="searchMore"
+          ref="suggest"
+  >
       <ul class="suggest-list">
           <li class="suggest-item" v-for="(item,index) in result" :key="index">
               <div class="icon">
@@ -8,21 +13,30 @@
               <div class="name">
                   <p class="text" v-html="getSongName(item)"></p>
               </div>
-          </li>
+          </li>         
+      <loadding v-show="hasMore"></loadding>
       </ul>
-  </div>
+  </scroll>
 </template>
 <script>
+import Scroll from 'base/scroll/scroll'
+import Loadding from 'base/loadding/loadding'
 import { createSong, isValidMusic, processSongsUrl } from 'common/js/song'
 import {search} from 'api/search'
 import {ERR_OK} from 'api/config'
- const perpage = 20
+const perpage = 20//每一页的搜索结果
 export default {
 data(){
     return{
         page:1,
-        result:[]
+        result:[],
+        hasMore:true,
+        pullUp:true
     }
+},
+components:{
+    Scroll,
+    Loadding
 },
   props:{
       query:{
@@ -32,7 +46,7 @@ data(){
       showSinger:{
           type:Boolean,
           default:false,
-      }
+      },
   },
   watch:{
       query(){//监听query变化,重新获取数据
@@ -41,12 +55,16 @@ data(){
   },
   methods:{
       _search(){//调用接口获取数据
+            this.page=1
+            this.hasMore= true
+            this.$refs.suggest.scrollTo(0,0) //当query变化时候重置搜索条件
           search(this.query,this.page,this.showSinger,perpage).then((res)=>{
               if(res.code === ERR_OK){
                   this.getResult(res.data).then((result)=>{
-                      this.result = this.result.concat(result)
+                      this.result = result
                   })
               }
+              this.checkMore(res.data.song)//确认是否还有更多数据
           })
       },
       getResult(data){//初始化歌曲
@@ -67,6 +85,24 @@ data(){
           }
         })
         return ret
+      },
+      checkMore(data){
+        let song = data
+        if(song.list.length === 0 || (song.curnum + (song.curpage - 1) * perpage) >= song.totalnum){
+            this.hasMore = false
+        }
+      },
+      searchMore(){//上拉加载,根据scroll组件派发的pullup事件
+          if(!this.hasMore) return
+          this.page++
+          search(this.query,this.page,this.showSinger,perpage).then((res)=>{
+              if(res.code === ERR_OK){
+                  this.getResult(res.data).then((result)=>{
+                      this.result = this.result.concat(result)//合并新的结果
+                  })
+              }
+              this.checkMore(res.data.song)//确认是否还有更多数据              
+          })
       },      
   }
 }
