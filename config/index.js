@@ -44,6 +44,7 @@ module.exports = {
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
     assetsPublicPath: '',
+    port: 3034,
 
     /**
      * Source Maps
