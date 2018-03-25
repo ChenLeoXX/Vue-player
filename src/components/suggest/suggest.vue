@@ -6,7 +6,7 @@
           ref="suggest"
   >
       <ul class="suggest-list">
-          <li class="suggest-item" v-for="(item,index) in result" :key="index">
+          <li @click="selectItem(item)" class="suggest-item" v-for="(item,index) in result" :key="index">
               <div class="icon">
                   <i class="icon-music"></i>
               </div>
@@ -16,11 +16,16 @@
           </li>         
       <loadding v-show="hasMore"></loadding>
       </ul>
+    <div v-show="!hasMore && !result.length" class="no-result-wrapper">
+      <no-result title="抱歉，暂无搜索结果"></no-result>
+    </div>      
   </scroll>
 </template>
 <script>
+import noResult from 'base/no-result/no-result'
 import Scroll from 'base/scroll/scroll'
 import Loadding from 'base/loadding/loadding'
+import {mapActions} from 'vuex'
 import { createSong, isValidMusic, processSongsUrl } from 'common/js/song'
 import {search} from 'api/search'
 import {ERR_OK} from 'api/config'
@@ -36,7 +41,8 @@ data(){
 },
 components:{
     Scroll,
-    Loadding
+    Loadding,
+    noResult
 },
   props:{
       query:{
@@ -55,8 +61,8 @@ components:{
   },
   methods:{
       _search(){//调用接口获取数据
-            this.page=1
-            this.hasMore= true
+            this.page=1//当query变化时候重置搜索条件
+            this.hasMore= true//当query变化时候重置搜索条件
             this.$refs.suggest.scrollTo(0,0) //当query变化时候重置搜索条件
           search(this.query,this.page,this.showSinger,perpage).then((res)=>{
               if(res.code === ERR_OK){
@@ -74,10 +80,10 @@ components:{
           return ret
         })          
       },
-      getSongName(item){
+      getSongName(item){//初始化歌曲
           return `${item.name}-${item.singer}`
       },
-      _normalizeSongs(list) {
+      _normalizeSongs(list) {//初始化歌曲
         let ret = []
         list.forEach((musicData) => {
           if (isValidMusic(musicData)) {
@@ -103,7 +109,14 @@ components:{
               }
               this.checkMore(res.data.song)//确认是否还有更多数据              
           })
-      },      
+      },
+      //搜索结果中播放歌曲,多次mutation应调用action
+      selectItem(song){
+          this.insertSong(song)
+      },
+      ...mapActions([
+          'insertSong'
+      ])      
   }
 }
 </script>
