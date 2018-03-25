@@ -1,12 +1,12 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Recommend from 'components/recommend/recommend'
-import Rank from 'components/rank/rank'
-import Search from 'components/search/search'
-import Disc from 'components/disc/disc'
-import topList from 'components/top-list/top-list'
 
 Vue.use(Router)
+const Recommend = () => import('components/recommend/recommend')
+const Disc = () => import('components/disc/disc')
+const TopList = () => import('components/top-list/top-list')
+const Rank = () => import('components/rank/rank')
+const Search = () => import('components/search/search')
 
 export default new Router({
   routes: [

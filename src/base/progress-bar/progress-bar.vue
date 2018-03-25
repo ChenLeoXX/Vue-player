@@ -71,7 +71,9 @@ export default {
           return percent
       },
       progressClick(e){
-          this.countOffset(e.offsetX)
+        const rect = this.$refs.progressBar.getBoundingClientRect()//获取播放进度小圈的实时位置,修复跳回一开始位置的问题
+        const offsetWidth = e.pageX - rect.left
+          this.countOffset(offsetWidth)
           this.onTouch()//实现点击改变播放时间
       }
   }
