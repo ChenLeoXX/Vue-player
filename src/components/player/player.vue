@@ -94,7 +94,7 @@
         </div>
       </div>
       </transition>
-        <audio @canplay="readyPlay" @error="songError" ref="audio"
+        <audio @play="readyPlay" @error="songError" ref="audio"
                @timeupdate="updateTime"
                @ended="songEnd" 
         :src="currentSong.url"></audio>      
@@ -175,12 +175,14 @@ export default {
 //这里也会触发mutation,把playing变成true
 //这里调用$nextTick因为当currentSong改变时,audio的DOM,SRC请求还没load,如果
 // 直接调用它的play方法,是冲突的,应该放在nextTick里当dom发生变化后立即调用.      
-      this.$nextTick(()=>{              
-        this.$refs.audio.play()                           
+      clearTimeout(this.timer)
+      this.timer = setTimeout(()=>{
+       this.$refs.audio.play()
         this.getLyric()
-      })
+      },1000)
     },
     playing(newPlaying){//播放暂停切换
+    if(!this.isSongReady) return
       let audio =this.$refs.audio
       this.$nextTick(()=>{
         newPlaying ? audio.play() : audio.pause()
@@ -294,9 +296,12 @@ export default {
       this.setCurrentIndex(index)
     },
     loop(){
-        this.currentSong.currentTime = 0
+        this.$refs.audio.currentTime = 0
         this.$refs.audio.play()
-        this.currentLyric.seek(0)      
+        this.setPlayingState(true)
+        if (this.currentLyric) {
+          this.currentLyric.seek(0)
+        } 
     },
     songEnd(){//歌曲播放结束判断逻辑
       if(this.mode === playMode.loop){
@@ -307,6 +312,7 @@ export default {
     },
     getLyric(){
       this.currentSong.getLyric().then(lyric=>{
+        if(this.currentSong.lyric !== lyric) return //确保在快速切歌时保证歌词正确
         this.currentLyric = new Lyric(lyric,this.handlerLyric)//翻入lyric-parser解析
         this.isPureMusic = !this.currentLyric.lines.length
         if (this.isPureMusic) {
