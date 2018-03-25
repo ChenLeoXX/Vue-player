@@ -2,7 +2,9 @@
   <scroll class="suggest"
           :data="result"
           :pullup="pullUp"
+          :beforeScroll="beforeScroll"
           @scrollToEnd="searchMore"
+          @beforeScroll="listScroll"
           ref="suggest"
   >
       <ul class="suggest-list">
@@ -36,7 +38,8 @@ data(){
         page:1,
         result:[],
         hasMore:true,
-        pullUp:true
+        pullUp:true,
+        beforeScroll:true
     }
 },
 components:{
@@ -55,7 +58,7 @@ components:{
       },
   },
   watch:{
-      query(){//监听query变化,重新获取数据
+      query(newVal){//监听query变化,重新获取数据
           this._search()
       }
   },
@@ -91,6 +94,9 @@ components:{
           }
         })
         return ret
+      },
+      listScroll(){
+          this.$emit('listScroll')
       },
       checkMore(data){
         let song = data

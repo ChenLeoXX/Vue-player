@@ -11,3 +11,14 @@ export const shuffle = function(arr){//洗牌算法,随机交换数组中两个�
     }
     return _arr
 }
+export const debounce = function(func,delay){//节流函数
+    let timer 
+    return function(...args){
+        if(timer){
+            clearTimeout(timer)
+        }
+        timer = setTimeout(()=>{
+            func.apply(this,args)
+        },delay)
+    }
+}

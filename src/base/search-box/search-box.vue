@@ -6,6 +6,7 @@
 </div> 
 </template>
 <script>
+import {debounce} from 'common/js/util'
 export default {
   props:{
       placeholder:{
@@ -13,10 +14,10 @@ export default {
           default:'搜索歌曲'
       }
   },
-  created(){
-      this.$watch('query',(newQuery)=>{
+  created(){//节流调用
+      this.$watch('query',debounce((newQuery)=>{
           this.$emit('query',newQuery)
-      })
+      },400))
   },
   data(){
       return{
@@ -29,7 +30,10 @@ export default {
       },
       setQuery(query){
           this.query= query
-      }
+      },
+      blur() {//移动端失去焦点,收起键盘
+        this.$refs.query.blur()
+      }      
   }
 }
 </script>
