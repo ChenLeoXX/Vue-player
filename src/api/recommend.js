@@ -12,7 +12,7 @@ export function getRecommend(){
       return jsonp(url, data, options)
 }
 export function getDiscList(){
-const url = debug ? '/api/getDiscList' : 'http://chenleo.top/music/api/getDiscList'
+const url = debug ? '/api/getDiscList' : 'http://music.chenleo.top/api/getDiscList'
     const data = Object.assign({}, commonParams, {
         platform: 'yqq',
         hostUin: 0,
@@ -32,7 +32,7 @@ const url = debug ? '/api/getDiscList' : 'http://chenleo.top/music/api/getDiscLi
 }
 
 export function getSongList(disstid) {
-  const url = debug ? '/api/getCdInfo' : 'http://chenleo.top/music/api/getCdInfo'
+  const url = debug ? '/api/getCdInfo' : 'http://music.chenleo.top/api/getCdInfo'
 
   const data = Object.assign({}, commonParams, {
     disstid,
