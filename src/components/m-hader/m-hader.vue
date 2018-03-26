@@ -1,7 +1,7 @@
 <template>
   <div class="m-hader">
       <div class="icon"></div>
-      <h1 class="text">QMusic</h1>
+      <!-- <h1 class="text">QMusic</h1> -->
   </div>
 </template>
 <script type="text/ecmascript-6">
@@ -22,11 +22,11 @@ export default {
       display: inline-block
       vertical-align: top
       margin-top: 6px
-      width: 30px
-      height: 32px
+      width:135px
+      height: 37px
       margin-right: 9px
       bg-image('logo')
-      background-size: 30px 32px
+      background-size: cover
     .text
       display: inline-block
       vertical-align: top
