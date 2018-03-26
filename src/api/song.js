@@ -7,7 +7,7 @@ import { ERR_OK } from 'api/config'
 const debug = process.env.NODE_ENV !== 'production'
 
 export function getLyric(mid) {
-  const url = debug ? '/api/lyric' : 'http://chenleo.top/api/lyric'
+  const url = debug ? '/api/lyric' : '/music/api/lyric'
 
   const data = Object.assign({}, commonParams, {
     songmid: mid,
@@ -27,7 +27,7 @@ export function getLyric(mid) {
 }
 
 export function getSongsUrl(songs) {
-  const url = debug ? '/api/getPurlUrl' : 'http://chenleo.top/api/getPurlUrl'
+  const url = debug ? '/api/getPurlUrl' : '/music/api/getPurlUrl'
 
   let mids = []
   let types = []
