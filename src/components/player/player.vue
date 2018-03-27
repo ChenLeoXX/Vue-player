@@ -32,6 +32,7 @@
             <div class="lyric-wrapper">
               <div v-if="currentLyric">
                 <p ref="lyricLine"
+                   :style="{fontSize:fontSize+'px',lineHeight:lineHeight+'px'}"
                    class="text"
                    :class="{'current': currentLineNum ===index}"
                    v-for="(line,index) in currentLyric.lines" :key="index">{{line.txt}}</p>
@@ -43,6 +44,17 @@
           </scroll>          
         </div>
         <div class="bottom">
+          <div class="font">
+            <div @click="fontUp" :class="{fontActive:fontShow}" class="plus">
+              <i class="iconfont add"></i>              
+            </div>
+            <div @click="fontDown" :class="{fontActive:fontShow}" class="reduce">
+               <i class="iconfont cut"></i>
+            </div>
+           <div id="font-control" @click.prevent="fontControl">
+              <i class="iconfont ziti"></i>
+           </div>            
+          </div>                    
           <div class="dot-wrapper">
             <span class="dot" :class="{'active':currentShow==='cd'}"></span>
             <span class="dot" :class="{'active':currentShow==='lyric'}"></span>
@@ -94,10 +106,10 @@
         </div>
       </div>
       </transition>
-        <audio @play="readyPlay" @error="songError" ref="audio"
+        <audio @playing="readyPlay" @error="songError" ref="audio"
                @timeupdate="updateTime"
                @ended="songEnd" 
-        :src="currentSong.url"></audio>      
+       ></audio>      
   </div>
 </template>
 <script>
@@ -126,7 +138,10 @@ export default {
       radius:32,
       playingLyric:"",
       isPureMusic:false,
-      pureMusicLyric: ''
+      pureMusicLyric: '',
+      fontShow:false,
+      fontSize:16,
+      lineHeight:34
     }
   },
   created(){
@@ -174,12 +189,14 @@ export default {
       }
 //这里也会触发mutation,把playing变成true
 //这里调用$nextTick因为当currentSong改变时,audio的DOM,SRC请求还没load,如果
-// 直接调用它的play方法,是冲突的,应该放在nextTick里当dom发生变化后立即调用.      
+// 直接调用它的play方法,是冲突的,应该放在nextTick里当dom发生变化后立即调用.     
+    this.$refs.audio.src = newSong.url
+    this.getLyric()
+    this.$refs.audio.play()
       clearTimeout(this.timer)
       this.timer = setTimeout(()=>{
-       this.$refs.audio.play()
-        this.getLyric()
-      },1000)
+        this.isSongReady= true
+      },5000)
     },
     playing(newPlaying){//播放暂停切换
     if(!this.isSongReady) return
@@ -194,6 +211,23 @@ export default {
     this.setModeTotas(true)
   },
   methods:{
+    fontDown(){
+      if(this.fontSize === 14) return 
+      this.fontSize=this.fontSize - 2
+      this.lineHeight=this.lineHeight - 4         
+    },
+    fontUp(){
+      if(this.fontSize === 28) return
+      this.fontSize=this.fontSize + 2
+      this.lineHeight=this.lineHeight + 4         
+    },
+    fontControl(){        
+      if(!this.fontShow){
+        this.fontShow= true
+      }else{
+        this.fontShow=false
+      }
+    },
     back(){//退出全屏
       this.setFullScreen(false)
     },
@@ -201,6 +235,7 @@ export default {
       this.setFullScreen(true)
     },
     prev(){//顺序播放上一首
+    
       if(!this.isSongReady){
         return 
       }
@@ -212,6 +247,7 @@ export default {
       if(currentIndex === -1 ){
          currentIndex = this.playList.length - 1
       }
+      this.setPlayingState(true)
       this.setCurrentIndex(currentIndex)
       this.isSongReady = false
       if(!this.playing){
@@ -230,6 +266,7 @@ export default {
       if(currentIndex === this.playList.length){
          currentIndex = 0
       }
+      this.setPlayingState(true)
       this.setCurrentIndex(currentIndex)
       this.isSongReady = false
       if(!this.playing){
@@ -413,7 +450,27 @@ export default {
 <style lang="stylus" scoped>
   @import "~common/stylus/variable"
   @import "~common/stylus/mixin"
-
+  .fontActive.plus,.fontActive.reduce
+     animation: show .5s linear
+     opacity:1
+  .font 
+      display:flex
+      justify-content :flex-end
+      flex-direction: column
+      align-items: flex-end
+      margin-right:20px
+      position: absolute
+      right: 0px
+      top: -160px
+      z-index:99
+      div
+       margin-bottom:25px
+       font-size:20px
+       padding:10px
+       opacity:0
+       transition-duration:.3s
+  #font-control
+      opacity:1
   .player
     .normal-player
       position: fixed
@@ -519,7 +576,7 @@ export default {
             .text
               line-height: 32px
               color: $color-text-l
-              font-size: $font-size-medium
+              font-size: 16px
               &.current
                 color: rgba(104, 204, 155, 0.87)
             .pure-music
@@ -652,11 +709,18 @@ export default {
           position: absolute
           left: 0
           top: 0
+
+      
   @keyframes rotate
     0%
       transform: rotate(0)
     100%
       transform: rotate(360deg)
+  @keyframes show
+    0%
+      opacity: 0
+    100%
+      opacity:1  
 </style>
 
 

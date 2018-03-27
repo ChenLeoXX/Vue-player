@@ -34,7 +34,6 @@ export const randomPlay = function({commit,state},{list}){//全部随机播放
 }
 
 export const insertSong = function({commit,state},song){
-    console.log(song)
     let playList = state.playList.slice(0) //播放列表,复制副本不直接引用.
     let sequenceList = state.sequenceList.slice(0)//歌曲列表
     let currentIndex = state.currentIndex

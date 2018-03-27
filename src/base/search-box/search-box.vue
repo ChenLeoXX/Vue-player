@@ -60,6 +60,7 @@ export default {
       color: #fff
       font-size: $font-size-medium
       outline: 0
+      padding:5px
       &::placeholder
         color: $color-text-d
     .icon-dismiss
