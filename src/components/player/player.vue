@@ -189,10 +189,12 @@ export default {
       }
 //这里也会触发mutation,把playing变成true
 //这里调用$nextTick因为当currentSong改变时,audio的DOM,SRC请求还没load,如果
-// 直接调用它的play方法,是冲突的,应该放在nextTick里当dom发生变化后立即调用.     
-    this.$refs.audio.src = newSong.url
-    this.$refs.audio.play()
-    this.getLyric()
+// 直接调用它的play方法,是冲突的,应该放在nextTick里当dom发生变化后立即调用. 
+      this.$nextTick(()=>{
+        this.$refs.audio.src = newSong.url
+        this.$refs.audio.play()
+        this.getLyric()
+      })    
     },
     playing(newPlaying){//播放暂停切换
     if(!this.isSongReady) return
