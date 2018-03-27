@@ -177,26 +177,26 @@ export default {
       ])
   },  
   watch:{
-    currentSong(newSong,oldSong){//点击后监听currentSong实现自动播放
-      if(!newSong.id || !newSong.url || newSong.id === oldSong.id) return //这里做一个取消逻辑,当播放模式切换的时候在暂停时不要播放歌曲.
-      this.isSongReady = false
-      if(this.currentLyric){
+    currentSong:{//点击后监听currentSong实现自动播放
+      handler(newSong, oldSong) {
+      if (!newSong.id) return
+      if (newSong.id === oldSong.id) return
+      if (this.currentLyric) {
         this.currentLyric.stop()
-        //重置歌词对象
-          this.currentLyric = null
-          this.currentTime = 0
-          this.playingLyric = ''
-          this.currentLineNum = 0        
-      }
-//这里也会触发mutation,把playing变成true
-//这里调用$nextTick因为当currentSong改变时,audio的DOM,SRC请求还没load,如果
-// 直接调用它的play方法,是冲突的,应该放在nextTick里当dom发生变化后立即调用.
-            this.$refs.audio.src = newSong.url
-          this.timer=setTimeout(()=>{
-            this.isSongReady = true        
-            this.$refs.audio.play()
-          this.getLyric()         
-        },1000)
+        // 重置为null
+        this.currentLyric = null
+        this.currentTime = 0
+        this.playingLyric = ''
+        this.currentLineNum = 0
+       }
+      clearTimeout(this.timer)
+      this.$refs.audio.src = newSong.url
+      this.timer = setTimeout(() => {
+      this.$refs.audio.play()
+      this.getLyric()
+     }, 800)
+  },
+    sync: true      
     },
     playing(newPlaying){//播放暂停切换
     if(!this.isSongReady) return
