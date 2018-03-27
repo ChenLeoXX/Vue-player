@@ -217,7 +217,7 @@ export default {
       this.lineHeight=this.lineHeight - 4         
     },
     fontUp(){
-      if(this.fontSize === 28) return
+      if(this.fontSize === 34) return
       this.fontSize=this.fontSize + 2
       this.lineHeight=this.lineHeight + 4         
     },
