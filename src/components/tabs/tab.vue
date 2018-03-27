@@ -20,19 +20,21 @@ export default {
 
 <style lang="stylus" scoped>
  @import "~common/stylus/variable"
+
 .tab
     display: flex
     height: 44px
     line-height: 44px
     font-size: $font-size-medium
+    background:rgba(104, 204, 155, 0.87)
     .tab-item
       flex: 1
       text-align: center
       .tab-link
         padding-bottom: 5px
-        color: $color-text-l
+        color: #fff
       &.router-link-active
         .tab-link
-          color: $color-theme
-          border-bottom: 2px solid $color-theme
+          border-bottom: 3px solid #fff;
+          font-weight: bold;
 </style>

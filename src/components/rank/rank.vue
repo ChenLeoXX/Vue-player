@@ -99,8 +99,7 @@ export default {
           padding: 0 20px
           height: 100px
           overflow: hidden
-          background: $color-highlight-background
-          color: $color-text-d
+          color: #000;
           font-size: $font-size-small
           .song
             no-wrap()

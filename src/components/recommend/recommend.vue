@@ -124,7 +124,7 @@ export default {
           line-height: 65px
           text-align: center
           font-size: $font-size-medium
-          color: $color-theme
+          color: rgb(49, 194, 124)
         .item
           display: flex
           box-sizing: border-box
@@ -144,9 +144,9 @@ export default {
             font-size: $font-size-medium
             .name
               margin-bottom: 10px
-              color: $color-text
+              color: rgb(49, 194, 124)
             .desc
-              color: $color-text-d
+              color: #000
       .loadding-ct
         position: absolute
         width: 100%

@@ -23,6 +23,6 @@ export default {
         .desc
             line-height:20px
             font-size:$font-size-small
-            color:$color-text-l
+            color:#000
 </style>
 

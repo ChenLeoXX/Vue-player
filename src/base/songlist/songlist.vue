@@ -84,11 +84,11 @@ export default {
         overflow: hidden
         .name
           no-wrap()
-          color: $color-text
+          color: rgb(49, 194, 124)
         .desc
           no-wrap()
           margin-top: 4px
-          color: $color-text-d
+          color: #000
 </style>
 
 

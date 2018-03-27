@@ -58,7 +58,7 @@
           </div>
           <div class="operators">
             <div class="icon i-left">
-              <i :class="playMode" @click="changeMode"></i>
+              <i :class="playMode" @click="changeMode" style="color:#fff"></i>
             </div>
             <div class="icon i-left" :class="disableCls">
               <i class="icon-prev" @click="prev"></i>
@@ -70,7 +70,7 @@
               <i class="icon-next" @click="next"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon icon-not-favorite"></i>
+              <i class="icon icon-not-favorite" style="color:#fff"></i>
             </div>
           </div>
         </div>
@@ -237,6 +237,7 @@ export default {
       }      
     },
     togglePlay(){//播放和暂停状态切换
+    if(!this.isSongReady) return
       if(!this.playing){
         this.setPlayingState(true)
       }else{
@@ -443,7 +444,7 @@ export default {
             display: block
             padding: 9px
             font-size: $font-size-large-x
-            color: $color-theme
+            color: #fff
             transform: rotate(-90deg)
         .title
           width: 70%
@@ -520,7 +521,7 @@ export default {
               color: $color-text-l
               font-size: $font-size-medium
               &.current
-                color: $color-text
+                color: rgba(104, 204, 155, 0.87)
             .pure-music
               padding-top: 50%
               line-height: 32px
@@ -568,9 +569,9 @@ export default {
           align-items: center
           .icon
             flex: 1
-            color: $color-theme
+            color: rgba(104, 204, 155, 0.87)
             &.disable
-              color: $color-theme-d
+              color: gray
             i
               font-size: 30px
           .i-left
@@ -583,7 +584,7 @@ export default {
           .i-right
             text-align: left
           .icon-favorite
-            color: $color-sub-theme
+            color: #fff
       &.normal-enter-active, &.normal-leave-active
         transition: all 0.4s
         .top, .bottom
@@ -603,7 +604,8 @@ export default {
       z-index: 180
       width: 100%
       height: 60px
-      background: $color-highlight-background
+      background: #fff
+      border-top: 1px solid rgb(49, 194, 124);
       &.mini-enter-active, &.mini-leave-active
         transition: all 0.4s
       &.mini-enter, &.mini-leave-to
@@ -633,24 +635,23 @@ export default {
           margin-bottom: 2px
           no-wrap()
           font-size: $font-size-medium
-          color: $color-text
+          color: #000
         .desc
           no-wrap()
           font-size: $font-size-small
-          color: $color-text-d
+          color: rgba(104, 204, 155, 0.87)
       .control
         flex: 0 0 30px
         width: 30px
         padding: 0 10px
         .icon-play-mini, .icon-pause-mini, .icon-playlist
           font-size: 30px
-          color: $color-theme-d
+          color: rgba(8, 136, 74, 0.78)
         .icon-mini
           font-size: 32px
           position: absolute
           left: 0
           top: 0
-
   @keyframes rotate
     0%
       transform: rotate(0)

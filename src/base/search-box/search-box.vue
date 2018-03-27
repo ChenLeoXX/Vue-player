@@ -47,24 +47,24 @@ export default {
     width: 100%
     padding: 0 6px
     height: 40px
-    background: $color-highlight-background
+    background: rgb(49, 194, 124)
     border-radius: 6px
     .icon-search
       font-size: 24px
-      color: $color-background
+      color: #fff
     .box
       flex: 1
       margin: 0 5px
       line-height: 18px
-      background: $color-highlight-background
-      color: $color-text
+      background: rgba(8, 136, 74, 0.78)
+      color: #fff
       font-size: $font-size-medium
       outline: 0
       &::placeholder
         color: $color-text-d
     .icon-dismiss
       font-size: 16px
-      color: $color-background
+      color: #fff
 </style>
 
 

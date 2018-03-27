@@ -79,15 +79,18 @@ export default {
           .title
             margin-bottom: 20px
             font-size: $font-size-medium
-            color: $color-text-l
+            color: rgb(49, 194, 124)
+            border-bottom :1px solid rgba(8, 136, 74, 0.78)
+            padding-bottom: 10px;            
           .item
             display: inline-block
             padding: 5px 10px
             margin: 0 20px 10px 0
-            border-radius: 6px
-            background: $color-highlight-background
+            border-radius: 102px
+            border:1px solid 
+            background: #fff
             font-size: $font-size-medium
-            color: $color-text-d
+            color: #000
         .search-history
           position: relative
           margin: 0 20px

@@ -144,11 +144,11 @@ components:{
         width: 30px
         [class^="icon-"]
           font-size: 14px
-          color: $color-text-d
+          color: rgba(8, 136, 74, 0.78)
       .name
         flex: 1
         font-size: $font-size-medium
-        color: $color-text-d
+        color: #000
         overflow: hidden
         .text
           no-wrap()

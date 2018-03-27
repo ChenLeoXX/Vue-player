@@ -43,8 +43,8 @@
       transform-origin: center
       &.progress-background
         transform: scale(0.9)
-        stroke: $color-theme-d
+        stroke: rgba(115, 218, 168, 0.78)
       &.progress-bar
         transform: scale(0.9) rotate(-90deg)
-        stroke: $color-theme
+        stroke: rgba(8, 136, 74, 0.78)
 </style>

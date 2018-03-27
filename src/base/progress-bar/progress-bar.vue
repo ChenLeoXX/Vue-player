@@ -92,7 +92,7 @@ export default {
       .progress
         position: absolute
         height: 100%
-        background: $color-theme
+        background: rgb(49, 194, 124)
       .progress-btn-wrapper
         position: absolute
         left: -8px
@@ -108,6 +108,6 @@ export default {
           height: 16px
           border: 3px solid $color-text
           border-radius: 50%
-          background: $color-theme
+          background: rgb(49, 194, 124)
 </style>
 

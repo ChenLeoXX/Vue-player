@@ -166,7 +166,7 @@ watch:{
         display: block
         padding: 10px
         font-size: $font-size-large-x
-        color: $color-theme
+        color: rgb(49, 194, 124)
     .title
       position: absolute
       top: 0
@@ -177,7 +177,7 @@ watch:{
       text-align: center
       line-height: 40px
       font-size: $font-size-large
-      color: $color-text
+      color: #fff
     .bg-image
       position: relative
       width: 100%
@@ -196,8 +196,8 @@ watch:{
           padding: 7px 0
           margin: 0 auto
           text-align: center
-          border: 1px solid $color-theme
-          color: $color-theme
+          border: 1px solid rgb(49, 194, 124)
+          color: rgb(49, 194, 124)
           border-radius: 100px
           font-size: 0
           .icon-play
@@ -215,17 +215,16 @@ watch:{
         left: 0
         width: 100%
         height: 100%
-        background: rgba(7, 17, 27, 0.4)
     .bg-layer
       position: relative
       height: 100%
-      background: $color-background
+      background: #fff
     .list
       position: absolute
       top: 0
       bottom: 0
       width: 100%
-      background: $color-background
+      background: #fff
       .song-list-wrapper
         padding: 20px 30px
       .loading-container

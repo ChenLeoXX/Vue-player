@@ -16,8 +16,8 @@ export default {
     position:relative
     height:44px
     text-align:center
-    color:$color-theme
     font-size 0
+    background: rgba(104, 204, 155, 0.87);
     .icon
       display: inline-block
       vertical-align: top
