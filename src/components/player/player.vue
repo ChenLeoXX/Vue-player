@@ -191,12 +191,8 @@ export default {
 //这里调用$nextTick因为当currentSong改变时,audio的DOM,SRC请求还没load,如果
 // 直接调用它的play方法,是冲突的,应该放在nextTick里当dom发生变化后立即调用.     
     this.$refs.audio.src = newSong.url
-    this.getLyric()
     this.$refs.audio.play()
-      clearTimeout(this.timer)
-      this.timer = setTimeout(()=>{
-        this.isSongReady= true
-      },5000)
+    this.getLyric()
     },
     playing(newPlaying){//播放暂停切换
     if(!this.isSongReady) return
@@ -207,7 +203,6 @@ export default {
     }
   },
   mounted(){
-    console.log(this.modeChange)
     this.setModeTotas(true)
   },
   methods:{
@@ -286,6 +281,7 @@ export default {
     },
     readyPlay(){
       this.isSongReady =true
+
     },
     songError(){
       this.isSongReady = true
