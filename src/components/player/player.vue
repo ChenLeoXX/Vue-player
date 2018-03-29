@@ -20,8 +20,8 @@
         >
           <div class="middle-l" ref='cd'>
            <div class="cd-wrapper">
-              <div class="cd">
-              <img class="image" :src="currentSong.image" :class="cdRotate">
+              <div class="cd" ref="imageWrapper">
+              <img class="image" :src="currentSong.image" :class="cdRotate" ref="image">
             </div>
            </div>
            <div class="playing-lyric-wrapper">
@@ -91,13 +91,14 @@
       <transition name="mini">
       <div class="mini-player" v-show="!fullScreen" @click="open">
         <div class="icon">
-         <div class="imgWrapper">
-            <img width="40" height="40" :src="currentSong.image" :class="cdRotate">
+         <div class="imgWrapper" ref="miniWrapper">
+            <img width="40" height="40" :src="currentSong.image" :class="cdRotate" ref="miniImage">
          </div>
         </div>
         <div class="text">
           <h2 class="name" v-html="currentSong.name"></h2>
-          <p class="desc" v-html="currentSong.singer"></p>
+          <p class="desc" v-html="currentSong.singer" v-if="!this.playing"></p>
+          <p class="playingLyric desc" v-if="this.playing">{{playingLyric}}</p>
         </div>
         <div class="control" @click.stop="togglePlay">
           <progress-circle :radius='radius' :percent="percent">
@@ -148,7 +149,7 @@ export default {
     this.touch={}//记录触摸信息
   },
   computed:{
-      cdRotate(){return this.playing? `play` : `pause`},
+      cdRotate(){return this.playing? `play` : 'pause'},
       playIcon(){ return this.playing ? 'icon-pause' : 'icon-play'},
       miniIcon() {
         return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
@@ -179,7 +180,6 @@ export default {
   watch:{
     currentSong:{//点击后监听currentSong实现自动播放
       handler(newSong, oldSong) {
-        console.log(newSong,oldSong)
       if (!newSong.id) return
       if (newSong.id === oldSong.id) return
       if (this.currentLyric) {
@@ -190,12 +190,13 @@ export default {
         this.playingLyric = ''
         this.currentLineNum = 0
        }
-      clearTimeout(this.timer)
       this.$refs.audio.src = newSong.url
-      this.timer = setTimeout(() => {
       this.$refs.audio.play()
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => {
+        this.isSongReady= true
+        }, 5000)
       this.getLyric()
-     }, 800)
   },
     // sync: true      
     },
@@ -205,6 +206,13 @@ export default {
       this.$nextTick(()=>{
         newPlaying ? audio.play() : audio.pause()
       })
+      if(!newPlaying){//暂停状态记录CD转动角度
+        if(this.fullScreen){
+          this.syncWrapperTransform('imageWrapper','image')
+        }else{
+          this.syncWrapperTransform('miniWrapper','miniImage')
+        }
+      }
     }
   },
   mounted(){
@@ -284,7 +292,18 @@ export default {
         this.currentLyric.togglePlay()  
       }
     },
-    readyPlay(){    
+    syncWrapperTransform (wrapper, inner) {//同步滚动暂停后图片旋转位置
+      if (!this.$refs[wrapper]) {
+        return
+      }
+      let imageWrapper = this.$refs[wrapper]
+      let image = this.$refs[inner]
+      let wTransform = getComputedStyle(imageWrapper)[transform]
+      let iTransform = getComputedStyle(image)[transform]
+      imageWrapper.style[transform] = wTransform === 'none' ? iTransform : iTransform.concat(' ', wTransform)
+    },
+    readyPlay(){
+      clearTimeout(this.timer)    
       this.isSongReady =true
         if (this.currentLyric && !this.isPureMusic) {
           this.currentLyric.seek(this.currentTime * 1000)
@@ -453,6 +472,9 @@ export default {
 <style lang="stylus" scoped>
   @import "~common/stylus/variable"
   @import "~common/stylus/mixin"
+  .playingLyric
+    color:#000
+    font-size:14px
   .fontActive.plus,.fontActive.reduce
      animation: show .5s linear
      opacity:1
@@ -665,7 +687,7 @@ export default {
       width: 100%
       height: 60px
       background: #fff
-      border-top: 1px solid rgb(49, 194, 124);
+      border-top: 2px solid rgb(49, 194, 124);
       &.mini-enter-active, &.mini-leave-active
         transition: all 0.4s
       &.mini-enter, &.mini-leave-to
