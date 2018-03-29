@@ -3,8 +3,9 @@
     <div class="search-box-wrapper">
       <search-box ref="searchBox" @query="onQueryChange"></search-box>
     </div>
-    <div class="shortcut-wrapper" v-show="!query">
-      <div class="shortcut">
+    <div class="shortcut-wrapper" v-show="!query" ref="shortcutWrapper">
+      <scroll :data="shortcut" class="shortcut" ref="shortcut">
+       <div> 
         <div class="hot-key">
           <h1 class="title">大家都在搜</h1>
           <ul>
@@ -23,9 +24,10 @@
           <search-list :searches="searchHistory" @select="addQuery" @delete="deleteOne"></search-list>
         </div>
       </div>
+      </scroll>
     </div>
-    <div class="search-result" v-show="query">
-      <suggest :query="query" @listScroll="blurInput" @selectItem="selectItem"></suggest>
+    <div class="search-result" v-show="query" ref="searchResult">
+      <suggest :query="query" @listScroll="blurInput" @selectItem="selectItem" ref="suggest"></suggest>
     </div>
     <confirm text="是否清除所有搜索记录" confirmBtnText='清除' ref="confirmBtn" 
             @confirm="clearAndHide"
@@ -33,14 +35,17 @@
   </div>
 </template>
 <script>
+import {playListMixin} from 'common/js/mixin'
 import SearchList from 'base/search-list/search-list'
 import Suggest from 'components/suggest/suggest'
 import SearchBox from 'base/search-box/search-box'
 import Confirm from 'base/confirm/confirm'
+import Scroll from 'base/scroll/scroll'
 import {getHotKey} from 'api/search'
 import {ERR_OK} from 'api/config'
 import {mapActions,mapGetters} from 'vuex'
 export default {
+  mixins:[playListMixin],
   data(){
     return{
       hotKey:[],
@@ -48,14 +53,34 @@ export default {
     }
   },
 computed:{
+  shortcut(){
+    return this.hotKey.concat(this.searchHistory)
+  },
   ...mapGetters([
     'searchHistory'
   ])
+},
+watch:{
+  query(newQuery){
+    if(!newQuery){
+      setTimeout(()=>{
+        this.$refs.shortcut.refresh()
+      },50)
+    }
+  }
 },  
   created(){
     this._getHotKey()
   },
   methods:{
+    handlePlayList(playlist){
+      const bottom = playlist.length > 0? '60px' :''
+      this.$refs.shortcutWrapper.style.bottom = bottom
+      this.$refs.shortcut.refresh()
+
+      this.$refs.searchResult.style.bottom = bottom
+      this.$refs.suggest.refresh()
+    },
     onQueryChange(query){//监听searchBox V-model传出来的query
     this.query = query
     },
@@ -91,7 +116,8 @@ computed:{
     SearchBox,
     Suggest,
     SearchList,
-    Confirm
+    Confirm,
+    Scroll
   }
 }
 </script>

@@ -63,6 +63,9 @@ components:{
       }
   },
   methods:{
+      refresh(){
+          this.$refs.suggest.refresh()
+      },
       _search(){//调用接口获取数据
             this.page=1//当query变化时候重置搜索条件
             this.hasMore= true//当query变化时候重置搜索条件

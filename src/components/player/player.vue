@@ -179,6 +179,7 @@ export default {
   watch:{
     currentSong:{//点击后监听currentSong实现自动播放
       handler(newSong, oldSong) {
+        console.log(newSong,oldSong)
       if (!newSong.id) return
       if (newSong.id === oldSong.id) return
       if (this.currentLyric) {
@@ -196,7 +197,7 @@ export default {
       this.getLyric()
      }, 800)
   },
-    sync: true      
+    // sync: true      
     },
     playing(newPlaying){//播放暂停切换
     if(!this.isSongReady) return
