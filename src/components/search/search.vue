@@ -13,18 +13,29 @@
             </li>
           </ul>
         </div>
+        <div class="search-history" v-show="searchHistory.length">
+          <h1 class="title">
+            <span class="text">搜索历史</span>
+            <span class="clear" @click="clearAll">
+              <i class="icon-clear"></i>
+            </span>
+          </h1>
+          <search-list :searches="searchHistory" @select="addQuery" @delete="deleteOne"></search-list>
+        </div>
       </div>
     </div>
     <div class="search-result" v-show="query">
-      <suggest :query="query" @listScroll="blurInput"></suggest>
+      <suggest :query="query" @listScroll="blurInput" @selectItem="selectItem"></suggest>
     </div>
   </div>
 </template>
 <script>
+import SearchList from 'base/search-list/search-list'
 import Suggest from 'components/suggest/suggest'
 import SearchBox from 'base/search-box/search-box'
 import {getHotKey} from 'api/search'
 import {ERR_OK} from 'api/config'
+import {mapActions,mapGetters} from 'vuex'
 export default {
   data(){
     return{
@@ -32,6 +43,11 @@ export default {
       query:""
     }
   },
+computed:{
+  ...mapGetters([
+    'searchHistory'
+  ])
+},  
   created(){
     this._getHotKey()
   },
@@ -51,11 +67,20 @@ export default {
     },
     blurInput(){
       this.$refs.searchBox.blur()
-    }
+    },
+    selectItem(){
+      this.setHistory(this.query)
+    },
+    ...mapActions([
+      'setHistory',
+      'clearAll',
+      'deleteOne'
+    ])
   },
   components:{
     SearchBox,
     Suggest,
+    SearchList
   }
 }
 </script>
@@ -99,14 +124,14 @@ export default {
             align-items: center
             height: 40px
             font-size: $font-size-medium
-            color: $color-text-l
+            color: #31c27c
             .text
               flex: 1
             .clear
               extend-click()
               .icon-clear
                 font-size: $font-size-medium
-                color: $color-text-d
+                color: #31c27c
     .search-result
       position: fixed
       width: 100%

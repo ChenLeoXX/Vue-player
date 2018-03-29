@@ -27,7 +27,7 @@
 import noResult from 'base/no-result/no-result'
 import Scroll from 'base/scroll/scroll'
 import Loadding from 'base/loadding/loadding'
-import {mapActions} from 'vuex'
+import {mapActions,mapGetters} from 'vuex'
 import { createSong, isValidMusic, processSongsUrl } from 'common/js/song'
 import {search} from 'api/search'
 import {ERR_OK} from 'api/config'
@@ -119,6 +119,7 @@ components:{
       //搜索结果中播放歌曲,多次mutation应调用action
       selectItem(song){
           this.insertSong(song)
+          this.$emit('selectItem')
       },
       ...mapActions([
           'insertSong'
