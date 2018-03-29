@@ -16,7 +16,7 @@
         <div class="search-history" v-show="searchHistory.length">
           <h1 class="title">
             <span class="text">搜索历史</span>
-            <span class="clear" @click="clearAll">
+            <span class="clear" @click="showDialog">
               <i class="icon-clear"></i>
             </span>
           </h1>
@@ -27,12 +27,16 @@
     <div class="search-result" v-show="query">
       <suggest :query="query" @listScroll="blurInput" @selectItem="selectItem"></suggest>
     </div>
+    <confirm text="是否清除所有搜索记录" confirmBtnText='清除' ref="confirmBtn" 
+            @confirm="clearAndHide"
+    ></confirm>
   </div>
 </template>
 <script>
 import SearchList from 'base/search-list/search-list'
 import Suggest from 'components/suggest/suggest'
 import SearchBox from 'base/search-box/search-box'
+import Confirm from 'base/confirm/confirm'
 import {getHotKey} from 'api/search'
 import {ERR_OK} from 'api/config'
 import {mapActions,mapGetters} from 'vuex'
@@ -71,6 +75,12 @@ computed:{
     selectItem(){
       this.setHistory(this.query)
     },
+    showDialog(){
+      this.$refs.confirmBtn.show()
+    },
+    clearAndHide(){
+     this.clearAll()
+    },
     ...mapActions([
       'setHistory',
       'clearAll',
@@ -80,7 +90,8 @@ computed:{
   components:{
     SearchBox,
     Suggest,
-    SearchList
+    SearchList,
+    Confirm
   }
 }
 </script>

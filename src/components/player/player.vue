@@ -82,7 +82,7 @@
               <i class="icon-next" @click="next"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon icon-not-favorite" style="color:#fff"></i>
+              <i class="icon icon-not-favorite" ></i>
             </div>
           </div>
         </div>
@@ -503,7 +503,7 @@ export default {
             display: block
             padding: 9px
             font-size: $font-size-large-x
-            color: #fff
+            color: rgba(104, 204, 155, 0.87)
             transform: rotate(-90deg)
         .title
           width: 70%
