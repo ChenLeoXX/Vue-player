@@ -181,7 +181,7 @@ export default {
     currentSong:{//点击后监听currentSong实现自动播放
       handler(newSong, oldSong) {
       if (!newSong.id) return
-      if (newSong.id === oldSong.id) return
+      if (!newSong.id || !newSong.url || newSong.id === oldSong.id) return
       if (this.currentLyric) {
         this.currentLyric.stop()
         // 重置为null
