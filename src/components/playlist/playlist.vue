@@ -12,8 +12,8 @@
                   </h1>
               </div>
               <scroll class="list-content" ref="scroll">
-                  <ul>
-                      <li class="item" v-for="(item,index) in sequenceList" :key="index"
+                  <transition-group name="list" ref='list' tag="ul">
+                      <li class="item" v-for="(item,index) in sequenceList" :key="item.id"
                           @click="selectItem(item,index)"
                       >
                           <i class="current" :class="getCurrentItem(item)"></i>
@@ -25,7 +25,7 @@
                               <i class="icon-delete"></i>
                           </span>
                       </li>
-                  </ul>
+                  </transition-group>
               </scroll>
               <!-- <div class="list-operate">
                   <div class="add">
@@ -61,31 +61,42 @@ export default {
           'mode'
       ])
   },
+  watch:{
+      currentSong(newSong){
+          this.scrollToCurrent(newSong)
+      },
+  },
   methods:{
       show(){
           //因为v-show控制DOM结构,display会导致获取不到滚动的高度信息,所以,进去的时候调用刷新方法
           this.showFlag = true
           this.$nextTick(()=>{
               this.$refs.scroll.refresh()
+              this.scrollToCurrent(this.currentSong)
           },)
       },
       hide(){
           this.showFlag = false
       },
-      getCurrentItem(item){
+      getCurrentItem(item){//播放图标切换
           if(item.id === this.currentSong.id){
               return 'icon-play'
           }
       },
-      selectItem(item,index){
+      selectItem(item,index){//点击播放逻辑
           if(this.mode === playMode.random){
-              console.log('?')
              index = this.playList.findIndex((song)=>{
                  return song.id === item.id
              })
           }
          this.setCurrentSong(index)
          this.setPlayingState(true)
+      },
+      scrollToCurrent(current){//自动滚动到正在播放的歌曲
+          let index = this.sequenceList.findIndex((song)=>{
+              return song.id === current.id
+          })
+          this.$refs.scroll.scrollToElement(this.$refs.list.$el.children[index],300)
       },
       ...mapMutations({
           setCurrentSong:'SET_CURRENT_INDEX',
