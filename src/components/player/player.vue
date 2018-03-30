@@ -192,14 +192,12 @@ export default {
         this.currentLineNum = 0
        }
       this.$refs.audio.src = newSong.url
-      clearTimeout(this.timer)
-      this.timer = setTimeout(() => {
-      this.isSongReady = true
-      this.$refs.audio.play()
-        }, 500)
+      this.$nextTick(()=>{
+      this.$refs.audio.play()        
+      })
       this.getLyric()
   },
-    sync: true      
+    // sync: true      
     },
     playing(newPlaying){//播放暂停切换
     if(!this.isSongReady) return
