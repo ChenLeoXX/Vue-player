@@ -46,7 +46,7 @@
         <div class="bottom">
           <div class="font">
             <div @click="fontUp" :class="{fontActive:fontShow}" class="plus">
-              <i class="iconfont add"></i>              
+              <i class="iconfont increase"></i>              
             </div>
             <div @click="fontDown" :class="{fontActive:fontShow}" class="reduce">
                <i class="iconfont cut"></i>
@@ -104,10 +104,17 @@
         <div class="control" @click.stop="togglePlay">
           <progress-circle :radius='radius' :percent="percent">
           <i :class="miniIcon" class='icon-mini'></i>     
-          </progress-circle>     
+          </progress-circle>               
+        </div>
+        <div class="control" :class="disableCls" @click.stop>
+          <i class="icon-next" @click="next" style="font-size:32px;color:rgba(8,136,74,0.78)"></i>
+        </div>                       
+        <div class="control" @click.stop="showPlaylist">
+          <i class="icon-playlist"></i>
         </div>
       </div>
       </transition>
+      <playlist ref="playList"></playlist>
         <audio @playing="readyPlay" @error="songError" ref="audio"
                @timeupdate="updateTime"
                @ended="songEnd"
@@ -124,6 +131,7 @@ import {playMode} from 'common/js/config'
 import {shuffle} from 'common/js/util'
 import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
+import Playlist from 'components/playlist/playlist'
 import {prefix} from 'common/js/dom'
 const transform = prefix('transform')
 const transitionDuration = prefix('transitionDuration')
@@ -308,6 +316,9 @@ export default {
           this.currentLyric.seek(this.currentTime * 1000)
         }      
     },
+    showPlaylist(){
+      this.$refs.playList.show()
+    },
     songError(){
       this.isSongReady = true
     },
@@ -464,7 +475,8 @@ export default {
     ProgressBar,
     ProgressCircle,
     Totas,
-    Scroll
+    Scroll,
+    Playlist
   }
 }
 </script>
