@@ -62,8 +62,9 @@
           <div class="progress-wrapper">
             <span class="time time-l">{{format(currentTime)}}</span>
             <div class="progress-bar-wrapper">
-              <progress-bar :percent="percent" @touchEnd="onTouchEnd"
-                                               @changeTime="changeCurrentTime" 
+              <progress-bar :percent="percent" ref="progressBar"
+                             @touchEnd="onTouchEnd"
+                             @changeTime="changeCurrentTime" 
               ></progress-bar>
             </div>
             <span class="time time-r">{{format(currentSong.duration)}}</span>
@@ -193,6 +194,7 @@ export default {
       this.$refs.audio.src = newSong.url
       clearTimeout(this.timer)
       this.timer = setTimeout(() => {
+      this.isSongReady = true
       this.$refs.audio.play()
         }, 500)
       this.getLyric()
@@ -240,6 +242,9 @@ export default {
     },
     open(){//全屏
       this.setFullScreen(true)
+      setTimeout(()=>{
+        this.$refs.progressBar.setProgress(this.percent)
+      },50)
     },
     prev(){//顺序播放上一首
     
