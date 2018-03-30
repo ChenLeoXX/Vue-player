@@ -191,14 +191,13 @@ export default {
         this.currentLineNum = 0
        }
       this.$refs.audio.src = newSong.url
-      this.$refs.audio.play()
       clearTimeout(this.timer)
       this.timer = setTimeout(() => {
-        this.isSongReady= true
-        }, 5000)
+      this.$refs.audio.play()
+        }, 500)
       this.getLyric()
   },
-    // sync: true      
+    sync: true      
     },
     playing(newPlaying){//播放暂停切换
     if(!this.isSongReady) return
@@ -283,11 +282,7 @@ export default {
     },
     togglePlay(){//播放和暂停状态切换
     if(!this.isSongReady) return
-      if(!this.playing){
-        this.setPlayingState(true)
-      }else{
-        this.setPlayingState(false)
-      }
+        this.setPlayingState(!this.playing)
       if(this.currentLyric){//歌曲暂停歌词停止滚动
         this.currentLyric.togglePlay()  
       }

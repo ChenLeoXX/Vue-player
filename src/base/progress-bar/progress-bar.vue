@@ -28,16 +28,24 @@ export default {
   created(){
       this.touch={}//记录touch的变化
   },
+  mounted(){
+
+  },
   watch:{//percent是变化的所以用watch
       percent(newPercent){//依赖父元素当前歌曲播放时间和总时间百分比
-        if(newPercent > 0 && !this.touch.inited){//设置权限,在touch时不应该计算percent值,解决进度条跳动
-            let progressWidth =  this.$refs.progressBar.clientWidth - ProgressBtn
-            let offsetPercent = progressWidth * newPercent
-            this.countOffset(offsetPercent)            
-        }
+          //设置权限,在touch时不应该计算percent值,解决进度条跳动
+          this.setProgress(newPercent)
       }
   },
   methods:{
+      setProgress(percent){
+        if(percent >= 0 && !this.touch.inited){
+            let progressBarWidth = this.$refs.progressBar.clientWidth
+            const progressWidth =  progressBarWidth - ProgressBtn
+            const offsetPercent = progressWidth * percent
+            this.countOffset(offsetPercent)            
+        }        
+      },
       progressTouchStart(e){
         this.touch.inited =true//加锁标记
         this.touch.startX = e.touches[0].pageX//记录点击位置X坐标
@@ -76,7 +84,7 @@ export default {
           this.countOffset(offsetWidth)
           this.onTouch()//实现点击改变播放时间
       }
-  }
+  },
 }
 </script>
 <style lang="stylus" scoped>
