@@ -334,14 +334,11 @@ export default {
       if(!this.playing){
         this.togglePlay()
       }
-      if(this.currentLyric){
-        this.currentLyric.seek(currentTime *1000) //实现拖动进度,歌词对应相对进度
-      }
     },
     changeCurrentTime(percent){//根据拖动返回百分比改变当前时间
        this.togglePlay()
       this.$refs.audio.currentTime =  this.currentSong.duration * percent
-     if (this.currentLyric) {
+     if (this.currentLyric) {//实现拖动进度,歌词对应相对进度
           this.currentLyric.seek(this.currentTime * 1000)
         }
     },
