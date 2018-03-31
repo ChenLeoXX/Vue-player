@@ -6,7 +6,7 @@
                   <h1 class="title">
                       <i class="icon"></i>
                       <span class="text"></span>
-                      <span class="clear">
+                      <span class="clear" @click="showConfirm">
                           <i class="icon-clear"></i>
                       </span>
                   </h1>
@@ -21,7 +21,7 @@
                           <span class="like">
                               <i class="icon-not-favorite"></i>
                           </span>
-                          <span class="delte">
+                          <span class="delte" @click.stop="deleteOne(item)">
                               <i class="icon-delete"></i>
                           </span>
                       </li>
@@ -37,13 +37,15 @@
                   <span>关闭</span>
               </div>
           </div>
+          <confirm text="是否要清除播放列表歌曲" @confirm="confirmClear" confirmBtn="清除" ref="confirm"></confirm>
       </div>
   </transition>
 </template>
 <script>
 import Scroll from 'base/scroll/scroll'
+import Confirm from 'base/confirm/confirm'
 import {playMode} from 'common/js/config'
-import {mapGetters,mapMutations} from 'vuex'
+import {mapGetters,mapMutations,mapActions} from 'vuex'
 export default {
   data(){
       return{
@@ -51,7 +53,8 @@ export default {
       }
   },
   components:{
-        Scroll
+        Scroll,
+        Confirm
   },
   computed:{
       ...mapGetters([
@@ -62,7 +65,10 @@ export default {
       ])
   },
   watch:{
-      currentSong(newSong){
+      currentSong(newSong,oldSong){
+        if (!this.showFlag || newSong.id === oldSong.id) {
+          return
+        }          
           this.scrollToCurrent(newSong)
       },
   },
@@ -98,10 +104,27 @@ export default {
           })
           this.$refs.scroll.scrollToElement(this.$refs.list.$el.children[index],300)
       },
+      deleteOne(song){
+          this.deleteSong(song)
+          if(!this.playList.length){
+              this.hide()
+          }
+      },
+      showConfirm(){
+          this.$refs.confirm.show()
+      },
+      confirmClear(){
+        this.clearList()
+        this.hide()
+      },
       ...mapMutations({
           setCurrentSong:'SET_CURRENT_INDEX',
           setPlayingState:'SET_PLAYING_STATE'
-      })
+      }),
+      ...mapActions([
+          'deleteSong',
+          'clearList'
+      ])
   },
 }
 </script>

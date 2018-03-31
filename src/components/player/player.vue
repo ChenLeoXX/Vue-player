@@ -115,7 +115,7 @@
       </div>
       </transition>
       <playlist ref="playList"></playlist>
-        <audio @playing="readyPlay" @error="songError" ref="audio"
+        <audio @playing="readyPlay" @error="songError" ref="audio" id="audio"
                @timeupdate="updateTime"
                @ended="songEnd"
        ></audio>      
@@ -189,7 +189,7 @@ export default {
   watch:{
     currentSong:{//点击后监听currentSong实现自动播放
       handler(newSong, oldSong) {
-      if (!newSong.id) return
+      if(!newSong.id) return
       if (!newSong.id || !newSong.url || newSong.id === oldSong.id) return
       if (this.currentLyric) {
         this.currentLyric.stop()
@@ -205,8 +205,7 @@ export default {
       this.$refs.audio.play()
         }, 500)
       this.getLyric()
-  },
-    sync: true      
+  },   
     },
     playing(newPlaying){//播放暂停切换
     if(!this.isSongReady) return
