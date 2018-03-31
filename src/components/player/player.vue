@@ -71,7 +71,7 @@
           </div>
           <div class="operators">
             <div class="icon i-left">
-              <i :class="playMode" @click="changeMode" style="color:#fff"></i>
+              <i :class="playMode" @click="changeMode" style="color: rgba(104,204,155,0.88);"></i>
             </div>
             <div class="icon i-left" :class="disableCls">
               <i class="icon-prev" @click="prev"></i>
@@ -124,11 +124,11 @@
 <script>
 import {mapGetters} from 'vuex'
 import {mapMutations} from 'vuex'
+import {playerMixin} from 'common/js/mixin'
 import  ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
 import Totas from 'base/totas/totas'
 import {playMode} from 'common/js/config'
-import {shuffle} from 'common/js/util'
 import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
 import Playlist from 'components/playlist/playlist'
@@ -138,6 +138,7 @@ const transitionDuration = prefix('transitionDuration')
 const timeExp = /\[(\d{2}):(\d{2}):(\d{2})]/g
 export default {
   name:"player",
+  mixins:[playerMixin],
   data(){
     return{
       isSongReady:false,
@@ -168,13 +169,7 @@ export default {
       },
       percent(){
         return this.currentTime / this.currentSong.duration
-      },
-      playMode(){
-        return this.mode === playMode.sequence? 'icon-sequence' : this.mode === playMode.random ? 'icon-random': this.mode === playMode.loop ? 'icon-loop' : false
-      },
-      msgType(){
-        return this.mode === playMode.sequence? '顺序播放' : this.mode === playMode.loop? '单曲循环' : this.mode === playMode.random ? '随机播放' : false
-      },     
+      },    
       ...mapGetters([
           'fullScreen',
           'playList',
@@ -191,7 +186,8 @@ export default {
       handler(newSong, oldSong) {
       if(!newSong.id) return
       if (!newSong.id || !newSong.url || newSong.id === oldSong.id) return
-      if (this.currentLyric) {
+     this.canLyricPlay = false
+     if (this.currentLyric) {
         this.currentLyric.stop()
         // 重置为null
         this.currentLyric = null
@@ -311,6 +307,7 @@ export default {
     readyPlay(){
       clearTimeout(this.timer)    
       this.isSongReady =true
+      this.canLyricPlay = true
         if (this.currentLyric && !this.isPureMusic) {
           this.currentLyric.seek(this.currentTime * 1000)
         }      
@@ -345,25 +342,6 @@ export default {
        this.togglePlay()
       this.$refs.audio.currentTime =  this.currentSong.duration * percent
     },
-    changeMode(){//播放模式切换
-      this.setModeTotas(true)
-      let newMode = (this.mode + 1) % 3
-      this.setCurrentMode(newMode)
-      let list = null
-      if(this.mode === playMode.random){//随机播放逻辑 
-         list = shuffle(this.sequenceList)
-      }else{
-        list = this.sequenceList//切换回正常列表播放
-      }      
-      this.resetCurrentIndex(list)
-      this.setPlayList(list)
-    },
-    resetCurrentIndex(list){//ES6 语法找到数组中符合函数条件的元素索引
-      let index = list.findIndex((item)=>{
-        return item.id === this.currentSong.id
-      })
-      this.setCurrentIndex(index)
-    },
     loop(){
         this.$refs.audio.currentTime = 0
         this.$refs.audio.play()
@@ -386,11 +364,11 @@ export default {
         this.isPureMusic = !this.currentLyric.lines.length
         if (this.isPureMusic) {
           this.pureMusicLyric = this.currentLyric.lrc.replace(timeExp, '').trim()
-        this.currentLyric.lrc.replace(timeExp, '').trim()
           this.playingLyric = this.pureMusicLyric
-        }        
-        if(this.playing){
-          this.currentLyric.play()//当播放的时候调用,Lyric构造函数的回调handlerLyric
+        }else{        
+        if(this.playing && this.canLyricPlay){
+          this.currentLyric.seek(this.currentTime *1000)//当播放的时候调用,Lyric构造函数的回调handlerLyric
+        }
         }
       }).catch(()=>{
         this.currentLyric = null
@@ -463,11 +441,6 @@ export default {
     }, 
     ...mapMutations({
       setFullScreen:'SET_FULL_SCREEN',
-      setPlayingState:'SET_PLAYING_STATE',
-      setCurrentIndex:'SET_CURRENT_INDEX',
-      setCurrentMode :'SET_PLAY_MODE',
-      setPlayList:'SET_PLAYLIST',
-      setModeTotas: 'SET_MODE_TOTAS'
     }),
   },
   components:{

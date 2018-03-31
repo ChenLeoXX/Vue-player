@@ -4,8 +4,8 @@
           <div class="list-wrapper" @click.stop>
               <div class="list-header">
                   <h1 class="title">
-                      <i class="icon"></i>
-                      <span class="text"></span>
+                      <i class="icon" :class="playMode" @click="changeMode" style="color: rgba(104,204,155,0.88);"></i>
+                      <span class="text">{{msgType}}</span>
                       <span class="clear" @click="showConfirm">
                           <i class="icon-clear"></i>
                       </span>
@@ -42,11 +42,13 @@
   </transition>
 </template>
 <script>
+import {playerMixin} from 'common/js/mixin'
 import Scroll from 'base/scroll/scroll'
 import Confirm from 'base/confirm/confirm'
 import {playMode} from 'common/js/config'
 import {mapGetters,mapMutations,mapActions} from 'vuex'
 export default {
+  mixins:[playerMixin],
   data(){
       return{
           showFlag:false
