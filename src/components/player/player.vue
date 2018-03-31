@@ -341,6 +341,9 @@ export default {
     changeCurrentTime(percent){//根据拖动返回百分比改变当前时间
        this.togglePlay()
       this.$refs.audio.currentTime =  this.currentSong.duration * percent
+     if (this.currentLyric) {
+          this.currentLyric.seek(this.currentTime * 1000)
+        }
     },
     loop(){
         this.$refs.audio.currentTime = 0

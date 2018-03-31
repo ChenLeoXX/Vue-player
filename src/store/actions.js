@@ -113,4 +113,5 @@ export const clearList = function({commit}){//如果列表删除到最后一首�
     commit(types.SET_CURRENT_INDEX,-1)
     commit(types.SET_PLAYLIST,[])
     commit(types.SET_SEQUENCE_LIST,[])
+    commit(types.SET_PLAY_MODE,0)
 }
