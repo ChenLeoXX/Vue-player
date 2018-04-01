@@ -1,4 +1,5 @@
 import {mapGetters,mapMutations,mapActions} from 'vuex'
+import {saveSearch,deleteHistory} from 'common/js/cache'
 import {shuffle} from 'common/js/util'
 import {playMode} from 'common/js/config'
 
@@ -73,4 +74,34 @@ export const playerMixin ={//player组件和playList组件共享逻辑
         setModeTotas: 'SET_MODE_TOTAS'          
     })    
  }
+}
+export const searchMixin = {
+    data(){
+        return{
+            query:""
+        }
+    },
+    computed:{
+        ...mapGetters([
+            'searchHistory'
+        ])
+    },
+    methods:{
+        addQuery(query){
+            this.$refs.searchBox.setQuery(query)
+          },        
+        onQueryChange(query){//监听searchBox V-model传出来的query
+            this.query = query
+            },        
+        blurInput(){
+            this.$refs.searchBox.blur()
+          },
+        selectItem(){
+            this.saveHistory(this.query)
+          },
+        ...mapActions([
+            'saveHistory',
+            'deleteOne'
+        ])                  
+    },
 }

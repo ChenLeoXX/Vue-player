@@ -5,7 +5,7 @@
       </div>
       <h1 class="title" v-html="title"></h1>
       <div class="bg-image" :style="bgStyle" ref="bgImage">
-          <div class="play-wrapper">
+          <div class="play-wrapper" v-show="this.songs.length">
               <div class="play" ref='playBtn'>
                   <i class="icon-play" v-show="songs.length>0"></i>
                   <span class="text" @click="randomPlayAll">随机播放全部</span>

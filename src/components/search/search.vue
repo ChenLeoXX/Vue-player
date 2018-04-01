@@ -35,7 +35,7 @@
   </div>
 </template>
 <script>
-import {playListMixin} from 'common/js/mixin'
+import {playListMixin,searchMixin} from 'common/js/mixin'
 import SearchList from 'base/search-list/search-list'
 import Suggest from 'components/suggest/suggest'
 import SearchBox from 'base/search-box/search-box'
@@ -45,11 +45,10 @@ import {getHotKey} from 'api/search'
 import {ERR_OK} from 'api/config'
 import {mapActions,mapGetters} from 'vuex'
 export default {
-  mixins:[playListMixin],
+  mixins:[playListMixin,searchMixin],
   data(){
     return{
       hotKey:[],
-      query:""
     }
   },
 computed:{
@@ -81,24 +80,12 @@ watch:{
       this.$refs.searchResult.style.bottom = bottom
       this.$refs.suggest.refresh()
     },
-    onQueryChange(query){//监听searchBox V-model传出来的query
-    this.query = query
-    },
-    addQuery(query){
-      this.$refs.searchBox.setQuery(query)
-    },
     _getHotKey(){
       getHotKey().then((res)=>{
         if(res.code === ERR_OK){
           this.hotKey = res.data.hotkey.slice(0,10)
         }
       })
-    },
-    blurInput(){
-      this.$refs.searchBox.blur()
-    },
-    selectItem(){
-      this.setHistory(this.query)
     },
     showDialog(){
       this.$refs.confirmBtn.show()
@@ -107,9 +94,7 @@ watch:{
      this.clearAll()
     },
     ...mapActions([
-      'setHistory',
       'clearAll',
-      'deleteOne'
     ])
   },
   components:{

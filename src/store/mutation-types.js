@@ -17,3 +17,5 @@ export const SET_MODE_TOTAS = 'SET_MODE_TOTAS'
 export const SET_TOP_LIST = "SET_TOP_LIST"
 
 export const SET_SEARCH_HISTORY = "SET_SEARCH_HISTORY"
+
+export const SET_PLAY_HISYORY = "SET_PLAY_HISYORY"

@@ -122,8 +122,7 @@
   </div>
 </template>
 <script>
-import {mapGetters} from 'vuex'
-import {mapMutations} from 'vuex'
+import {mapGetters, mapActions,mapMutations} from 'vuex'
 import {playerMixin} from 'common/js/mixin'
 import  ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
@@ -308,6 +307,7 @@ export default {
       clearTimeout(this.timer)    
       this.isSongReady =true
       this.canLyricPlay = true
+      this.setPlay(this.currentSong)//保存播放历史
         if (this.currentLyric && !this.isPureMusic) {
           this.currentLyric.seek(this.currentTime * 1000)
         }      
@@ -442,6 +442,9 @@ export default {
     ...mapMutations({
       setFullScreen:'SET_FULL_SCREEN',
     }),
+    ...mapActions([
+      'setPlay'
+    ])
   },
   components:{
     ProgressBar,

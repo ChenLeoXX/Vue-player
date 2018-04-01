@@ -27,16 +27,17 @@
                       </li>
                   </transition-group>
               </scroll>
-              <!-- <div class="list-operate">
-                  <div class="add">
+              <div class="list-operate">
+                  <div class="add" @click="showAddSong">
                       <i class="icon-add"></i>
-                      <span class="text">添加歌曲到队列</span>
+                      <span class="text">添加歌曲到列表</span>
                   </div>
-              </div> -->
+              </div>
               <div class="list-close" @click="hide">
                   <span>关闭</span>
               </div>
           </div>
+          <add-song ref="addSong"></add-song>
           <confirm text="是否要清除播放列表歌曲" @confirm="confirmClear" confirmBtn="清除" ref="confirm"></confirm>
       </div>
   </transition>
@@ -45,6 +46,7 @@
 import {playerMixin} from 'common/js/mixin'
 import Scroll from 'base/scroll/scroll'
 import Confirm from 'base/confirm/confirm'
+import addSong from 'components/add-song/add-song'
 import {playMode} from 'common/js/config'
 import {mapGetters,mapMutations,mapActions} from 'vuex'
 export default {
@@ -56,7 +58,8 @@ export default {
   },
   components:{
         Scroll,
-        Confirm
+        Confirm,
+        addSong
   },
   computed:{
       ...mapGetters([
@@ -75,6 +78,9 @@ export default {
       },
   },
   methods:{
+      showAddSong(){
+          this.$refs.addSong.show()
+      },
       show(){
           //因为v-show控制DOM结构,display会导致获取不到滚动的高度信息,所以,进去的时候调用刷新方法
           this.showFlag = true
