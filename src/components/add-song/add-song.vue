@@ -21,7 +21,7 @@
                         <song-list :songs="playHistory" @select="selectSong"></song-list>
                     </div>
                 </scroll>
-                <scroll ref="searchList" class="list-scroll" :data="searchHistory" v-if="currentIndex === 1">
+                <scroll :refreshDelay="delay" ref="searchList" class="list-scroll" :data="searchHistory" v-if="currentIndex === 1">
                        <div class="list-inner">
                         <search-list :searches="searchHistory"
                                       @delete="deleteOne"
@@ -34,6 +34,12 @@
           <div class="search-result" v-show="query">
               <suggest :query="query" @selectItem="selectSuggset" @listScroll="blurInput"></suggest>              
           </div>
+          <tips ref="tips"> 
+            <div class="tip-title">
+            <i class="icon-ok"></i>
+            <span class="text">歌曲已经添加到播放列表</span>
+            </div>              
+          </tips>
       </div>
   </transition>
 </template>
@@ -41,6 +47,7 @@
 import {searchMixin} from 'common/js/mixin'
 import SearchBox from 'base/search-box/search-box'
 import Switches from 'base/switches/switches'
+import Tips from 'base/tips/tips'
 import Scroll from 'base/scroll/scroll'
 import SongList from 'base/songlist/songlist'
 import SearchList from 'base/search-list/search-list'
@@ -70,14 +77,14 @@ export default {
       Switches,
       Scroll,
       SongList,
-      SearchList
+      SearchList,
+      Tips
   },
   methods:{
       show(){
         this.showFlag = true
-        setTimeout(()=>{//display:block,重新渲染计算高度
+            //display:block,重新渲染计算高度
             this.refresh()
-        },50)
       },
       hide(){
           this.showFlag = false
@@ -87,19 +94,26 @@ export default {
       },
       selectSuggset(){
           this.selectItem()
+          this.showTip()
       },
        //这里new是因为,playHistory是从缓存中取到的,并不是song实例,需要调用Song构造函数生成
       selectSong(song,index){
           if(index !==0){
           this.insertSong(new Song(song),index)
+          this.showTip()
           }
       },
+      showTip(){
+          this.$refs.tips.show()
+      },
       refresh(){
-          if(currentIndex === 0 ){
+          setTimeout(()=>{
+          if(this.currentIndex === 0 ){
               this.$refs.playList.refresh()
           }else{
               this.$refs.searchList.refresh()
-          }
+          }              
+          },50)
       },
       ...mapActions([
           'insertSong'

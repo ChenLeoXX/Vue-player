@@ -43,6 +43,7 @@ import Scroll from 'base/scroll/scroll'
 import Loadding from 'base/loadding/loadding'
 import {mapMutations} from 'vuex'
 import {playListMixin} from 'common/js/mixin'
+import {debounce} from 'common/js/util'
 export default {
   mixins:[playListMixin],
   name:"recommend",
@@ -60,8 +61,12 @@ export default {
   created(){
     this._getRecommend() //异步获取真实数据
     this._getRecommendDiscList()
+    this.resize()
   },
   methods:{
+    resize(){
+      window.addEventListener('resize',debounce(()=>{location.reload()},300))
+    },
     _getRecommend(){
       getRecommend().then((res)=>{
         if(res.code === ERR_OK){

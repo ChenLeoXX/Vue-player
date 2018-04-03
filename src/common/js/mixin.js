@@ -1,5 +1,4 @@
 import {mapGetters,mapMutations,mapActions} from 'vuex'
-import {saveSearch,deleteHistory} from 'common/js/cache'
 import {shuffle} from 'common/js/util'
 import {playMode} from 'common/js/config'
 
@@ -33,6 +32,9 @@ export const playerMixin ={//player组件和playList组件共享逻辑
         return this.mode === playMode.random ? 'icon-random' : this.mode === playMode.loop ? 'icon-loop':
         'icon-sequence'
     },
+    favoriteIcon() {
+        return this.getFavoriteIcon(this.currentSong)
+    },    
     msgType(){
       return this.mode === playMode.sequence? '顺序播放' : this.mode === playMode.loop? '单曲循环' : this.mode === playMode.random ? '随机播放' : false
     },     
@@ -41,7 +43,8 @@ export const playerMixin ={//player组件和playList组件共享逻辑
         'playList',
         'sequenceList',
         'currentSong',
-        'fullScreen'
+        'fullScreen',
+        'favoriteHistory'
     ])
  },
  methods:{
@@ -65,7 +68,30 @@ export const playerMixin ={//player组件和playList组件共享逻辑
           return item.id === this.currentSong.id
         })
         this.setCurrentIndex(index)
-      }, 
+      },
+      toggleFavorite(song) {//收藏切换
+        if (this.isFavorite(song)) {
+          this.cancelFavorite(song)
+        } else {
+          this.setFavorite(song)
+        }
+      },
+      getFavoriteIcon(song) {//收藏图标
+        if (this.isFavorite(song)) {
+          return 'icon-favorite'
+        }
+        return 'icon-not-favorite'
+      },      
+      isFavorite(song) {//收藏判断
+        const index = this.favoriteHistory.findIndex((item) => {
+          return item.id === song.id
+        })
+        return index > -1
+      },
+      ...mapActions([
+          'setFavorite',
+          'cancelFavorite'
+      ]),       
       ...mapMutations({
         setPlayingState:'SET_PLAYING_STATE',
         setCurrentIndex:'SET_CURRENT_INDEX',
@@ -78,7 +104,8 @@ export const playerMixin ={//player组件和playList组件共享逻辑
 export const searchMixin = {
     data(){
         return{
-            query:""
+            query:"",
+            delay:100
         }
     },
     computed:{

@@ -2,7 +2,7 @@ import * as types from './mutation-types'
 import {shuffle} from 'common/js/util'
 import {playMode} from 'common/js/config'
 import storage from 'good-storage'
-import {saveSearch,clearAllHistory,deleteHistory,savePlay} from 'common/js/cache'
+import {saveSearch,clearAllHistory,deleteHistory,savePlay,saveFavorite,deleteFavorite} from 'common/js/cache'
 
 function findIndex(list,song){
     let index= list.findIndex((item)=>{
@@ -49,21 +49,21 @@ export const insertSong = function({commit,state},song){
     playList.splice(currentIndex,0,song)
     //如果歌曲已经存在,判断之前歌曲位置,分两种情况,删除之前歌曲
     if(fpIndex > -1){
-        if(currentIndex > fpindex){//当前相同歌曲索引在之前相同歌曲后面
-            playList.splice(fpindex,1)//
+        if(currentIndex > fpIndex){//当前相同歌曲索引在之前相同歌曲后面
+            playList.splice(fpIndex,1)//
             currentIndex--
         }else{
             playList.splice(fpIndex+1,1)
         }
     }
     let currentInsertIndex = findIndex(sequenceList,currentSong) + 1 //歌曲列表要插入的位置
-    let fpindex = findIndex(sequenceList,song) //是否有相同歌曲
+    let fsIndex = findIndex(sequenceList,song) //是否有相同歌曲
     sequenceList.splice(currentInsertIndex,0,song)
-    if(fpindex > -1){//存在分情况,操作歌曲列表
-        if(currentInsertIndex > fpindex){
-            sequenceList.splice(fpIndex,1)
+    if(fsIndex > -1){//存在分情况,操作歌曲列表
+        if(currentInsertIndex > fsIndex){
+            sequenceList.splice(fsIndex,1)
         }else{
-            sequenceList.splice(fpIndex +1 ,1)
+            sequenceList.splice(fsIndex +1 ,1)
         }
     }
     commit(types.SET_PLAYLIST,playList)
@@ -118,4 +118,12 @@ export const clearList = function({commit}){//如果列表删除到最后一首�
 
 export const setPlay = function({commit},song){
     commit(types.SET_PLAY_HISYORY,savePlay(song))
+}
+
+export const setFavorite = function({commit},song){
+    commit(types.SET_FAVORITE_HISTORY,saveFavorite(song))
+}
+
+export const cancelFavorite = function({commit},song){
+    commit(types.SET_FAVORITE_HISTORY,deleteFavorite(song))
 }

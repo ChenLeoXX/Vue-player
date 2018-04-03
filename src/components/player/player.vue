@@ -83,7 +83,7 @@
               <i class="icon-next" @click="next"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon icon-not-favorite" ></i>
+              <i class="icon" @click="toggleFavorite(currentSong)" :class="getFavoriteIcon(currentSong)"></i>
             </div>
           </div>
         </div>
@@ -183,6 +183,7 @@ export default {
   watch:{
     currentSong:{//点击后监听currentSong实现自动播放
       handler(newSong, oldSong) {
+        console.log(newSong,oldSong)
       if(!newSong.id) return
       if (!newSong.id || !newSong.url || newSong.id === oldSong.id) return
      this.canLyricPlay = false
@@ -339,7 +340,7 @@ export default {
        this.togglePlay()
       this.$refs.audio.currentTime =  this.currentSong.duration * percent
      if (this.currentLyric) {//实现拖动进度,歌词对应相对进度
-          this.currentLyric.seek(this.currentTime * 1000)
+          this.currentLyric.seek(this.$refs.audio.currentTime * 1000)
         }
     },
     loop(){
@@ -652,7 +653,7 @@ export default {
           .i-right
             text-align: left
           .icon-favorite
-            color: #fff
+            color: $color-sub-theme
       &.normal-enter-active, &.normal-leave-active
         transition: all 0.4s
         .top, .bottom

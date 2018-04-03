@@ -3,8 +3,9 @@ import storage from 'good-storage'
 const SEARCH_KEY = '__search__'
 const SEARCH_MAX_LEN = 15
 const PLAY_KEY = "__play__"
-const PLAY_MAX_LEN = 200
-
+const PLAY_MAX_LEN = 100
+const FAVORITE_KEY = '__favorite__'
+const FAVORITE_MAX_LEN = 200
  function insertArray(arr,val,compareFunc,maxlen){//一个搜索历史保存函数,比较函数对比结果返回索引做对应处理
     const index = arr.findIndex(compareFunc) 
     if(index === 0) return 
@@ -53,4 +54,31 @@ export function savePlay(song){//保存搜索历史
 
 export function loadPlay(){
     return storage.get(PLAY_KEY,[])
+}
+
+export function saveFavorite(song){//收藏储存
+    let favoriteArr = storage.get(FAVORITE_KEY,[])
+    insertArray(favoriteArr,song,(item)=>{
+        return item.id === song.id
+    },FAVORITE_KEY)
+    storage.set(FAVORITE_KEY,favoriteArr)
+    return favoriteArr
+}
+function deleteFormArray (arr,compareFunc){
+ let index = arr.findIndex(compareFunc)
+ if(index > -1){
+     arr.splice(index,1)
+ }
+}
+export function deleteFavorite(song){//取消收藏
+   let favoriteArr = storage.get(FAVORITE_KEY,[])  
+    deleteFormArray(favoriteArr,(item)=>{
+        return item.id === song.id
+    })
+    storage.set(FAVORITE_KEY,favoriteArr)
+    return favoriteArr
+}
+
+export function loadFavorite(){
+    return storage.get(FAVORITE_KEY,[])
 }

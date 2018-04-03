@@ -60,7 +60,7 @@ export default {
         const offsetWidth = Math.min( this.$refs.progressBar.clientWidth - ProgressBtn,Math.max(0,this.touch.left + deltaX))
         //计算拖动后的偏移量,设置最大值,最小值.
         this.countOffset(offsetWidth)
-        let percent = this.onTouch()//实现拖动改变播放时间
+        let percent = this._getPercent()//实现拖动改变播放时间
         this.$emit('changeTime',percent)
       },
       progressTouchEnd(){
@@ -77,6 +77,12 @@ export default {
           let percent = progressInnerWidth / progressBarWidth
           this.$emit('touchEnd',percent)
           return percent
+      },
+      _getPercent(){
+          let progressBarWidth = this.$refs.progressBar.clientWidth - ProgressBtn
+          let progressInnerWidth = this.$refs.progress.clientWidth
+          let percent = progressInnerWidth / progressBarWidth
+          return percent        
       },
       progressClick(e){
         const rect = this.$refs.progressBar.getBoundingClientRect()//获取播放进度小圈的实时位置,修复跳回一开始位置的问题

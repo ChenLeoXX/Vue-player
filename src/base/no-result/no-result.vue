@@ -22,7 +22,7 @@
     .no-result-text
       margin-top: 30px
       font-size: $font-size-medium
-      color: $color-text-d
+      color: #000
 </style>
 
 

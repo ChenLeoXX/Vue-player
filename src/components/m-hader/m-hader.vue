@@ -1,7 +1,9 @@
 <template>
   <div class="m-hader">
       <div class="icon"></div>
-      <!-- <h1 class="text">QMusic</h1> -->
+      <router-link to="/user" tag="div" class="mine">
+        <i class="icon-mine"></i>
+      </router-link>
   </div>
 </template>
 <script type="text/ecmascript-6">
@@ -40,6 +42,6 @@ export default {
         display: block
         padding: 12px
         font-size: 20px
-        color: $color-theme      
+        color: #fff
 </style>
 
