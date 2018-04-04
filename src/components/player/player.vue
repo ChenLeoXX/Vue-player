@@ -183,7 +183,6 @@ export default {
   watch:{
     currentSong:{//点击后监听currentSong实现自动播放
       handler(newSong, oldSong) {
-        console.log(newSong,oldSong)
       if(!newSong.id) return
       if (!newSong.id || !newSong.url || newSong.id === oldSong.id) return
      this.canLyricPlay = false
